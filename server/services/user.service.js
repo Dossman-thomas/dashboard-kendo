@@ -2,6 +2,7 @@
 import { UserModel } from "../database/models/user.model.js";
 import { pagination } from "../utils/common.util.js";
 import { Op } from "sequelize";
+import bcrypt from 'bcrypt';
 
 // Create a new user
 export const createUserService = async (userData) => {
@@ -114,5 +115,36 @@ export const checkEmailAvailabilityService = async (email, currentUserId) => {
     return !existingUser; // returns true if email is available, false if taken
   } catch (error) {
     throw new Error(error);
+  }
+};
+
+// Check if provided password matches user's current password
+export const passwordCheckService = async (userId, currentPassword) => {
+  try {
+    // Validate input
+    if (!userId || !currentPassword) {
+      throw new Error("User ID and current password are required");
+    }
+
+    const user = await UserModel.findByPk(userId, {
+      attributes: ['id', 'name', 'email', 'password'] // Explicitly include password
+    });
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Additional null/undefined check for password
+    if (!user.password) {
+      throw new Error("No password found for this user");
+    }
+
+    // Use bcrypt to compare the provided password with the stored hashed password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    
+    return isPasswordValid;
+  } catch (error) {
+    console.error('Password check error:', error);
+    throw error;
   }
 };

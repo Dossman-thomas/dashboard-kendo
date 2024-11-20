@@ -8,6 +8,7 @@ import {
   deleteUserService,
   authenticateUserService,
   checkEmailAvailabilityService,
+  passwordCheckService,
 } from "../services/index.js";
 
 
@@ -232,6 +233,28 @@ export const verifyUserPassword = async (req, res) => {
     return response(res, {
       statusCode: 200,
       message: messages.general.SUCCESS,
+    });
+  } catch (error) {
+    console.error(error);
+    return response(res, {
+      statusCode: 500,
+      message: messages.general.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
+// Compare current password to user's input
+export const checkCurrentPassword = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { currentPassword } = req.body;
+
+    const isPasswordValid = await passwordCheckService(userId, currentPassword);
+    
+    return response(res, {
+      statusCode: 200,
+      message: messages.general.SUCCESS,
+      data: { isValid: isPasswordValid }
     });
   } catch (error) {
     console.error(error);

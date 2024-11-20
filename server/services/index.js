@@ -5,6 +5,7 @@ export {
   updateUserService,
   deleteUserService,
   checkEmailAvailabilityService,
+  passwordCheckService,
 } from "./user.service.js";
 
 export {

@@ -8,6 +8,7 @@ import {
   deleteUser,
   getCurrentUser,
   checkEmailAvailability,
+  checkCurrentPassword,
 } from "../controllers/index.js";
 
 export const userRouter = Router();
@@ -33,5 +34,5 @@ userRouter.delete('/delete/:id', authenticateJWT, deleteUser); // endpoint: /api
 // Fetch current User
 userRouter.get('/current-user/:id', authenticateJWT, getCurrentUser); // endpoint: /api/users/current-user/:id
 
-// // Verify user password route
-// userRouter.post('/:id/verify-password', verifyUserPassword); // endpoint: /api/users/:id/verify-password
+// Verify user password route
+userRouter.post('/check-password/:id', authenticateJWT, checkCurrentPassword); // endpoint: /api/users/check-password/:id

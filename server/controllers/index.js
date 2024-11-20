@@ -9,6 +9,7 @@ export {
   deleteUser,
   getCurrentUser,
   checkEmailAvailability,
+  checkCurrentPassword,
 } from './user.controller.js';
 
 // Permissions
