@@ -1,0 +1,43 @@
+.dash-container {
+    width: 92%;
+    height: 300px; 
+}
+
+.stat-cards {
+    padding: 10px 30px;
+    border-radius: 13px;
+    border: none;
+}
+
+.card-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+#welcome-user {
+    color: var(--secondary-text);
+    font-size: 25px;
+}
+
+#dash-username {
+    color: var(--primary-purple);
+}
+
+#stat-div {
+    height: 140px;
+}
+
+/* Card colors */
+
+#tot-users-card {
+    background-color: var(--primary-blue);
+}
+
+#tot-d-managers-card {
+    background-color: var(--secondary-red);
+}
+
+#tot-employee-card {
+    background-color: var(--secondary-purple);
+}

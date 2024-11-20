@@ -1,0 +1,81 @@
+<div class="card mt-5 p-4 w-75 mx-auto">
+  <h2 class="mb-3">
+    <span id="create-heading">Create </span>
+    <span class="secondary-text">New Record</span>
+  </h2>
+  <form [formGroup]="createUserForm" (ngSubmit)="onCreateUser()">
+    <div class="mb-3">
+      <label for="userName" class="form-label">Name:</label>
+      <input
+        type="text"
+        class="form-control"
+        id="userName"
+        formControlName="name"
+        [class.is-invalid]="createUserForm.get('name')?.invalid && createUserForm.get('name')?.touched"
+        required
+      />
+      <div *ngIf="createUserForm.get('name')?.invalid && createUserForm.get('name')?.touched" class="text-danger my-2">
+       * Name is required.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="userEmail" class="form-label">Email:</label>
+      <input
+        type="email"
+        class="form-control"
+        id="userEmail"
+        formControlName="email"
+        [class.is-invalid]="createUserForm.get('email')?.invalid && createUserForm.get('email')?.touched"
+        required
+      />
+      <div *ngIf="createUserForm.get('email')?.invalid && createUserForm.get('email')?.touched" class="text-danger my-2">
+       * Please enter a valid email address.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="userRole" class="form-label">Role:</label>
+      <select
+        class="form-control"
+        id="userRole"
+        formControlName="role"
+        [class.is-invalid]="createUserForm.get('role')?.invalid && createUserForm.get('role')?.touched"
+        required
+      >
+        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+      </select>
+      <div *ngIf="createUserForm.get('role')?.invalid && createUserForm.get('role')?.touched" class="text-danger my-2">
+       * Pick a Role.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="userPassword" class="form-label">Temporary Password:</label>
+      <div class="input-group">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          class="form-control mt-2"
+          id="userPassword"
+          formControlName="password"
+          [class.is-invalid]="createUserForm.get('password')?.invalid && createUserForm.get('password')?.touched"
+          required
+        />
+        <span class="input-group-text eye-icon mt-2" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+          <i class="fa" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+        </span>
+      </div>
+      <div *ngIf="createUserForm.get('password')?.invalid && createUserForm.get('password')?.touched" class="text-danger my-2">
+        * Password must include at least one special character, one uppercase letter, and one digit.
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      class="btn w-100 create-btn my-2"
+      [disabled]="!createUserForm.valid"
+    >
+      Create
+    </button>
+  </form>
+</div>

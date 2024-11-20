@@ -1,0 +1,20 @@
+<div class="card m-5 p-4">
+  <h2 class="mb-3 mt-1">
+    <span id="edit-heading">Edit </span>
+    <span class="secondary-text">User Records</span>
+  </h2>
+  <ag-grid-angular
+    #agGrid
+    style="width: 100%; height: 600px"
+    class="ag-theme-quartz mb-1"
+    [rowData]="users"
+    [columnDefs]="colDefs"
+    [defaultColDef]="defaultColDef"
+    [pagination]="pagination"
+    [paginationPageSizeSelector]="paginationPageSizeSelector"
+    [paginationPageSize]="paginationPageSize"
+    [rowHeight]="50"
+    (cellValueChanged)="onCellValueChanged($event)"
+  >
+  </ag-grid-angular>
+</div>

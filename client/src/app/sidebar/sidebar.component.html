@@ -1,0 +1,59 @@
+<div *ngIf="isVisible" class="sidebar" [ngClass]="{ 'collapsed': isCollapsed }">
+  <button class="toggle-btn" (click)="toggleSidebar()">
+    <i class="fa" [ngClass]="isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+  </button>
+
+  <ul class="menu-items">
+    <li>
+      <button routerLink="/dashboard" routerLinkActive="active">
+        <i class="fa-solid fa-table-columns"></i>
+        <span *ngIf="!isCollapsed">Dashboard</span>
+      </button>
+    </li>
+    <li *ngIf="isAdmin">
+      <button routerLink="/manage-permissions" routerLinkActive="active">
+        <i class="fa fa-lock"></i>
+        <span *ngIf="!isCollapsed">Manage Permissions</span>
+      </button>
+    </li>
+
+    <li>
+      <button routerLink="/manage-records" routerLinkActive="active">
+        <i class="fa fa-database"></i>
+        <span *ngIf="!isCollapsed">Manage Records</span>
+      </button>
+    </li>
+
+    <!-- <li *ngIf="hasManageRecordsPermission">
+      <button (click)="toggleManageRecordsDropdown()" class="d-flex gap-2 mb-2">
+        <i class="fa fa-database"></i>
+        <span *ngIf="!isCollapsed" routerLink="/manage-records">Manage Records</span>
+        <i class="fa" [ngClass]="showManageRecordsDropdown ? 'fa-chevron-down' : 'fa-chevron-right'" *ngIf="!isCollapsed"></i>
+      </button>
+      <ul *ngIf="showManageRecordsDropdown && !isCollapsed">
+        <li *ngIf="canCreate">
+          <button routerLink="/create-record" routerLinkActive="active">Create Record</button>
+        </li>
+        <li *ngIf="canUpdate">
+          <button routerLink="/update-record" routerLinkActive="active">Update Record</button>
+        </li>
+        <li *ngIf="canDelete">
+          <button routerLink="/delete-record" routerLinkActive="active">Delete Record</button>
+        </li>
+      </ul>
+    </li> -->
+
+    <li>
+      <button routerLink="/my-account" routerLinkActive="active">
+        <i class="fa fa-user"></i>
+        <span *ngIf="!isCollapsed">My Account</span>
+      </button>
+    </li>
+    <li>
+      <button (click)="logout()">
+        <i class="fa fa-sign-out-alt"></i>
+        <span *ngIf="!isCollapsed">Log out</span>
+      </button>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,64 @@
+.pass-inputs {
+    border-right: none;
+}
+
+.card-title {
+    margin: 0;
+    color: var(--primary-purple);
+    letter-spacing: 0.03em;
+}
+
+.business-card-text {
+    margin-bottom: 8px;
+}
+
+/* .change-password-btn {
+    color: var(--secondary-red);
+    cursor: pointer;
+}
+
+.change-password-btn:active {
+    border: none;
+}
+
+.save-btn,
+.update-pass-btn,
+.edit-user-btn {
+    background-color: var(--primary-purple);
+    color: white;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.save-btn:hover,
+.update-pass-btn:hover,
+.edit-user-btn:hover {
+    background-color: var(--secondary-purple);
+}
+
+.cancel-btn {
+    background-color: var(--secondary-red);
+    color: white;
+    cursor: pointer;
+
+} */
+
+#update-heading,
+#change-pass-heading {
+    color: var(--secondary-blue);
+    font-weight: bold;
+    font-size: 2.4rem;
+  }
+
+#role-title {
+    letter-spacing: 0.15em;
+    /* transform: translateY(-5px); */
+    /* font-family: 'Trebuchet MS'; */
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 100%;
+    margin-bottom: 70px;
+}
+
+

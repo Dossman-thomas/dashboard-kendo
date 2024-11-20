@@ -1,0 +1,30 @@
+/* .card {
+  background-color: #FAFAFA;
+  color: black;
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0px 3px 13.3px 9px rgba(202, 208, 238, 0.308);
+} */
+
+.eye-icon {
+    background-color: white;
+    border-left: none; /* Remove the border on the left side of the eye icon*/
+  }
+
+  .input-group-text {
+    cursor: pointer;
+  }
+
+  #rememberMe:checked {
+    background-color: var(--primary-purple);
+    color: white;
+    border: 1px solid #ccc;
+  }
+
+  #password {
+    border-right: none; /* Remove the border on the right of the password input field */
+  }
+
+  #login-btn {
+    background-color: var(--primary-purple);
+  }

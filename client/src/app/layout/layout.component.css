@@ -1,0 +1,19 @@
+.app-layout {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--primary-bg);
+  }
+  
+  app-header {
+    width: 100%;
+  }
+
+  app-sidebar {
+    z-index: 2;
+  }

@@ -1,0 +1,23 @@
+
+.create-btn {
+    background-color:var(--primary-purple);
+    color: white;
+    border: none;
+}
+
+#create-heading {
+    color: var(--primary-purple);
+    font-weight: bold;
+    font-size: 2.4rem;
+}
+
+#userPassword {
+    border-right: none;
+}
+
+#userRole {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+}
+
+

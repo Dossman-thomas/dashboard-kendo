@@ -1,0 +1,115 @@
+<div class="card m-5 p-4">
+
+<!-- Table Header -->
+  <div class="d-flex justify-content-between">
+    <h2 class="mb-3 mt-1">
+      <span id="edit-heading">Manage </span>
+      <span class="secondary-text">User Records</span>
+    </h2>
+    <!-- conditionally render create button based on role permissions -->
+    <button class="btn create-user-btn" *ngIf="canCreate" (click)="toggleModal()">Create User</button>
+  </div>
+
+  <p *ngIf="canUpdate" class="tertiary-text">* To update records click on the table cell you'd like to update.</p>
+
+<!-- User Records Table -->
+  <ag-grid-angular
+    #agGrid
+    style="width: 100%; height: 600px"
+    class="ag-theme-quartz mb-1"
+    [rowData]="users"
+    [columnDefs]="colDefs"
+    [defaultColDef]="defaultColDef"
+    [pagination]="pagination"
+    [paginationPageSizeSelector]="paginationPageSizeSelector"
+    [paginationPageSize]="paginationPageSize"
+    [rowHeight]="50"
+    (cellValueChanged)="onCellValueChanged($event)"
+    (gridReady)="onGridReady($event)"
+  >
+  </ag-grid-angular>
+</div>
+
+<!-- Modal for Creating User -->
+<div class="modal fade" [ngClass]="{ 'show d-block': showModal }" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create New User</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="toggleModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="createUserForm" (ngSubmit)="onCreateUser()">
+            <div class="mb-3">
+              <label for="userName" class="form-label">Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="userName"
+                formControlName="name"
+                [class.is-invalid]="createUserForm.get('name')?.invalid && createUserForm.get('name')?.touched"
+                required
+              />
+              <div *ngIf="createUserForm.get('name')?.invalid && createUserForm.get('name')?.touched" class="text-danger my-2">
+                * Name is required.
+              </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="userEmail" class="form-label">Email:</label>
+              <input
+                type="email"
+                class="form-control"
+                id="userEmail"
+                formControlName="email"
+                [class.is-invalid]="createUserForm.get('email')?.invalid && createUserForm.get('email')?.touched"
+                required
+              />
+              <div *ngIf="createUserForm.get('email')?.invalid && createUserForm.get('email')?.touched" class="text-danger my-2">
+                * Please enter a valid email address.
+              </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="userRole" class="form-label">Role:</label>
+              <select
+                class="form-control"
+                id="userRole"
+                formControlName="role"
+                [class.is-invalid]="createUserForm.get('role')?.invalid && createUserForm.get('role')?.touched"
+                required
+              >
+                <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+              </select>
+              <div *ngIf="createUserForm.get('role')?.invalid && createUserForm.get('role')?.touched" class="text-danger my-2">
+                * Pick a Role.
+              </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="userPassword" class="form-label">Temporary Password:</label>
+              <div class="input-group">
+                <input
+                  [type]="showPassword ? 'text' : 'password'"
+                  class="form-control"
+                  id="userPassword"
+                  formControlName="password"
+                  [class.is-invalid]="createUserForm.get('password')?.invalid && createUserForm.get('password')?.touched"
+                  required
+                />
+                <span class="input-group-text" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                  <i class="fa" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </span>
+              </div>
+              <div *ngIf="createUserForm.get('password')?.invalid && createUserForm.get('password')?.touched" class="text-danger my-2">
+                * Password must include at least one special character, one uppercase letter, and one digit.
+              </div>
+            </div>
+  
+            <button type="submit" class="btn btn-primary w-100" [disabled]="!createUserForm.valid">Create</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+

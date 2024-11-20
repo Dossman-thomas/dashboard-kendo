@@ -1,0 +1,59 @@
+.sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    height: 100vh;
+    padding: 20px;
+    transition: width 0.3s ease;
+  }
+  
+  .sidebar.collapsed {
+    width: 80px;
+  }
+  
+  .toggle-btn {
+    background-color: transparent;
+    border: none;
+    color: #4B49AC;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .menu-items {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .menu-items li {
+    margin-bottom: 20px;
+
+  }
+  
+  .menu-items button {
+    background-color: transparent;
+    border: none;
+    color: #4B49AC;
+    text-align: left;
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: 15px;
+    transition: .5s;
+  }
+  
+  .menu-items button i {
+    margin-right: 10px;
+  }
+  
+  .menu-items button.active {
+    background-color: #4B49AC;
+    color: white;
+  }
+
+  .menu-items button:hover {
+    background-color: #F3797E;
+    color: white;
+  }
+  

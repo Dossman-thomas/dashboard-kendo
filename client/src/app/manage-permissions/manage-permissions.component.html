@@ -1,0 +1,53 @@
+<div class="card m-5 p-5">
+  <h2 class="mb-3">
+    <span id="manage-heading">Manage </span>
+    <span class="secondary-text">Permissions</span>
+  </h2>
+  <div class="d-flex flex-wrap flex-lg-nowrap flex-column flex-lg-row justify-content-between gap-4">
+    <div class="cards" *ngFor="let rolePermission of (rolePermissions$ | async)">
+      <div class="card" id="permissions">
+        <div class="c-header mx-auto">
+          <h5 class="titles">{{ rolePermission.role | titlecase }}</h5>
+        </div>
+        <div class="card-body">
+          <form class="d-flex flex-column gap-5 p-3 justify-content-around align-items-center mb-4">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="{{ rolePermission.role }}-create"
+                [(ngModel)]="rolePermission.canCreate"
+                (change)="onPermissionChange(rolePermission.role, $event)"
+                name="canCreate"
+              />
+              <label class="form-check-label" for="{{ rolePermission.role }}-create">Can Create</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="{{ rolePermission.role }}-update"
+                [(ngModel)]="rolePermission.canUpdate"
+                (change)="onPermissionChange(rolePermission.role, $event)"
+                name="canUpdate"
+              />
+              <label class="form-check-label" for="{{ rolePermission.role }}-update">Can Update</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="{{ rolePermission.role }}-delete"
+                [(ngModel)]="rolePermission.canDelete"
+                (change)="onPermissionChange(rolePermission.role, $event)"
+                name="canDelete"
+              />
+              <label class="form-check-label" for="{{ rolePermission.role }}-delete">Can Delete</label>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>

@@ -1,0 +1,16 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white header">
+  <a class="navbar-brand" href="/dashboard">
+    <img src="../../assets/pictures/Dashboard-logo.png" alt="Logo" height="40" />
+  </a>
+  <div class="collapse navbar-collapse justify-content-end">
+    <ul class="navbar-nav">
+      <li class="nav-item d-flex align-items-center gap-3" *ngIf="userEmail">
+        <span class="nav-link user-email">
+          {{ userEmail }}
+        </span>
+        <i class="fas fa-user user-icon"></i>
+        <!-- User icon -->
+      </li>
+    </ul>
+  </div>
+</nav>
