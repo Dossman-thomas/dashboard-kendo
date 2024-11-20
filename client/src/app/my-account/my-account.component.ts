@@ -118,40 +118,61 @@ export class MyAccountComponent implements OnInit {
 
   onSubmitNewPassword(): void {
     if (!this.currentUser) return;
-
+  
     const { currentPassword, newPassword, confirmNewPassword } = this.passwordForm.value;
-
-    if (this.currentUser.password !== currentPassword) {
-      this.passwordError = 'Current password is incorrect.';
+  
+    // Validate form
+    if (this.passwordForm.invalid) {
+      this.passwordError = 'Please fill out all required fields correctly.';
       return;
     }
-
+  
+    // Check if new passwords match
     if (newPassword !== confirmNewPassword) {
       this.passwordError = 'New passwords do not match.';
       return;
     }
-
-    const updatedUser: User = {
-      ...this.currentUser,
-      password: newPassword,
-    };
-
-    if (this.currentUser.id) {
-      this.userService.updateUser(this.currentUser.id, updatedUser).subscribe({
-        next: () => {
-          console.log('Password updated successfully.');
-          this.userService.setCurrentUser(updatedUser); // Update the current user in UserService
-          this.onCancelPasswordChange();
-          alert('Your password was updated successfully.');
-        },
-        error: (error) => {
-          console.error('Error updating password:', error);
-          this.passwordError = 'Failed to update password.';
-        },
-      });
-    } else {
+  
+    // Ensure user ID is a number and not undefined
+    const userId = this.currentUser.id;
+    if (userId === undefined) {
       console.error('User ID is undefined');
+      this.passwordError = 'Unable to update password. User ID is missing.';
+      return;
     }
+  
+    // Use the checkPassword method to verify current password
+    this.userService.checkPassword(userId, currentPassword).subscribe({
+      next: (isPasswordValid) => {
+        if (!isPasswordValid) {
+          this.passwordError = 'Current password is incorrect. Please try again.';
+          return;
+        }
+  
+        // If password is valid, proceed with update
+        const updatedUser: User = {
+          ...this.currentUser!,
+          password: newPassword,
+        };
+  
+        this.userService.updateUser(userId, updatedUser).subscribe({
+          next: () => {
+            console.log('Password updated successfully.');
+            this.userService.setCurrentUser(updatedUser);
+            this.onCancelPasswordChange();
+            alert('Your password was updated successfully.');
+          },
+          error: (error) => {
+            console.error('Error updating password:', error);
+            this.passwordError = 'Failed to update password.';
+          },
+        });
+      },
+      error: (error) => {
+        console.error('Error checking password:', error);
+        this.passwordError = 'An error occurred while verifying your current password.';
+      }
+    });
   }
 
   togglePasswordVisibility() {
