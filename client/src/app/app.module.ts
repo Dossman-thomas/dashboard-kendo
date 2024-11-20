@@ -22,6 +22,10 @@ import { DeleteButtonRendererComponent } from './delete-button-renderer/delete-b
 import { UpdateButtonRendererComponent } from './update-button-renderer/update-button-renderer.component';
 import { LayoutComponent } from './layout/layout.component';
 import { ManageRecordsComponent } from './manage-records/manage-records.component';
+import { GridModule } from '@progress/kendo-angular-grid';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+
 
 @NgModule({
   declarations: [
@@ -47,6 +51,8 @@ import { ManageRecordsComponent } from './manage-records/manage-records.componen
     AgGridAngular,
     ReactiveFormsModule,
     HttpClientModule,
+    GridModule,
+    BrowserAnimationsModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
