@@ -21,6 +21,8 @@ export class ManageRecordsComponent implements OnInit {
   showPassword: boolean = false;
 
   pagesize:any=[5,10,25,50,100];
+  skip: number = 0;
+  take: number = 10;
 
   // Permissions flags
   canCreate: boolean = false;
@@ -35,8 +37,8 @@ export class ManageRecordsComponent implements OnInit {
 
   // Pagination settings
   public state: State = {
-    skip: 0,
-    take: 10
+    skip: this.skip,
+    take: this.take
   };
 
 
