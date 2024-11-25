@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserService, User } from '../services/user.service';
 import { of } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-my-account',
@@ -23,7 +24,8 @@ export class MyAccountComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private userService: UserService
+    private userService: UserService,
+    private toastr: ToastrService
   ) {
     this.userForm = this.fb.group({
       name: ['', Validators.required],
@@ -89,11 +91,12 @@ export class MyAccountComponent implements OnInit {
               next: (user) => {
                 console.log('User updated:', user);
                 this.userService.setCurrentUser(user); // Update the current user in UserService
-                alert('Your profile was updated successfully.');
+                this.toastr.success('Account updated successfully!');
                 this.isEditing = false;
               },
               error: (error) => {
                 console.error('Error updating user:', error);
+                this.toastr.error('Failed to update account. Please try again.');
               },
             });
           } else {
@@ -160,11 +163,11 @@ export class MyAccountComponent implements OnInit {
             console.log('Password updated successfully.');
             this.userService.setCurrentUser(updatedUser);
             this.onCancelPasswordChange();
-            alert('Your password was updated successfully.');
+            this.toastr.success('Password updated successfully!');
           },
           error: (error) => {
             console.error('Error updating password:', error);
-            this.passwordError = 'Failed to update password.';
+            this.toastr.error('Failed to update password. Please try again.');
           },
         });
       },
