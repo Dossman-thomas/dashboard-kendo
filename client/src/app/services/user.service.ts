@@ -110,16 +110,37 @@ export class UserService {
   }
 
   // Get all users
-  getAllUsers(): Observable<User[]> {
+  // getAllUsers(): Observable<User[]> {
+  //   return this.http
+  //     .get<any>(`${this.baseUrl}`, { headers: this.getHeaders() })
+  //     .pipe(
+  //       map((res) => res.data), // Extract the 'data' property
+  //       catchError((error) => {
+  //         console.log('Error fetching users:', error); // Log the error
+  //         return throwError(
+  //           () => new Error('Failed to fetch users. Please try again later.')
+  //         ); // Return an observable error
+  //       })
+  //     );
+  // }
+
+  getAllUsers(params?: { page: number; limit: number }): Observable<User[]> {
+    const options = {
+      headers: this.getHeaders(),
+      params: params
+        ? { page: params.page.toString(), limit: params.limit.toString() }
+        : undefined,
+    };
+  
     return this.http
-      .get<any>(`${this.baseUrl}`, { headers: this.getHeaders() })
+      .get<any>(`${this.baseUrl}`, options)
       .pipe(
         map((res) => res.data), // Extract the 'data' property
         catchError((error) => {
-          console.log('Error fetching users:', error); // Log the error
+          console.log('Error fetching users:', error);
           return throwError(
             () => new Error('Failed to fetch users. Please try again later.')
-          ); // Return an observable error
+          );
         })
       );
   }

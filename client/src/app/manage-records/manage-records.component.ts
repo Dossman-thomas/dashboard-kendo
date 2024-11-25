@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserService, User } from '../services/user.service';
 import { PermissionsService } from '../services/permissions.service';
-import { ColDef, GridApi } from 'ag-grid-community';
-import { DeleteButtonRendererComponent } from '../delete-button-renderer/delete-button-renderer.component';
-import { AgGridAngular } from 'ag-grid-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
+import { State } from '@progress/kendo-data-query';
+import { DeleteButtonRendererComponent } from '../delete-button-renderer/delete-button-renderer.component';
 
 @Component({
   selector: 'app-manage-records',
@@ -12,15 +12,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./manage-records.component.css'],
 })
 export class ManageRecordsComponent implements OnInit {
-  @ViewChild(AgGridAngular) agGrid!: AgGridAngular;
 
   users: User[] = [];
-  rowData: User[] = [];
-  gridApi!: GridApi<User>;
+  gridData: any = { data: [], total: 0 };
   showModal: boolean = false; // show/hide modal
   createUserForm!: FormGroup; // Form group for creating a new user
   roles: string[] = ['admin', 'data manager', 'employee'];
   showPassword: boolean = false;
+
+  pagesize:any=[5,10,25,50,100];
 
   // Permissions flags
   canCreate: boolean = false;
@@ -33,39 +33,17 @@ export class ManageRecordsComponent implements OnInit {
     private permissionsService: PermissionsService
   ) {}
 
-  paginationPageSizeSelector = [10, 25, 50, 100];
-  paginationPageSize = 25;
-  pagination = true;
-
-  defaultColDef: ColDef = {
-    flex: 1,
-    filter: true,
-    sortable: true,
-    editable: (params) => this.canUpdate, // Enable editing based on permissions
+  // Pagination settings
+  public state: State = {
+    skip: 0,
+    take: 10
   };
 
-  colDefs: ColDef[] = [
-    { field: 'id', headerName: 'ID', editable: false },
-    { field: 'name', headerName: 'Name', flex: 3 },
-    { field: 'email', headerName: 'Email', flex: 3 },
-    { field: 'role', headerName: 'Role', flex: 2 },
-    {
-      headerName: 'Action',
-      cellRenderer: DeleteButtonRendererComponent, // Custom cell renderer for delete button
-      cellRendererParams: {
-        onClick: this.onDelete.bind(this),
-        // canDelete: this.canDelete // Pass the permission flag to the renderer
-      },
-      editable: false,
-      filter: false,
-      sortable: false,
-      resizable: false,
-    },
-  ];
 
   ngOnInit() {
     this.initializeForm();
     this.setPermissions();
+    this.loadUsers();
   }
 
   // Fetch current user's permissions
@@ -120,16 +98,22 @@ export class ManageRecordsComponent implements OnInit {
     });
   }
 
-  fetchUsers(): void {
-    this.userService.getAllUsers().subscribe({
+  public dataStateChange(state: DataStateChangeEvent): void {
+    this.state = state;
+    this.loadUsers();
+}
+
+  // Load users with pagination and filters
+  loadUsers() {
+    const page = this.skip / this.take + 1;
+    this.userService.getAllUsers({ page, limit: this.take }).subscribe({
       next: (response: any) => {
-        // Check if response.rows exists and is an array
         if (Array.isArray(response.rows)) {
-          this.users = response.rows as User[];
-          if (this.gridApi) {
-            this.gridApi.applyTransaction({ add: this.users }); // Apply the data transaction
-          }
-          // console.log('Users:', this.users);
+          this.users = response.rows;
+          this.gridData = {
+            data: this.users,
+            total: response.totalCount,
+          };
         } else {
           console.error('Expected rows array but got:', response);
         }
@@ -140,11 +124,11 @@ export class ManageRecordsComponent implements OnInit {
     });
   }
 
-  onGridReady(params: any) {
-    this.gridApi = params.api;
-    // console.log('Grid API initialized:', this.gridApi);
-    this.fetchUsers();
-  }
+  // onGridReady(params: any) {
+  //   this.gridApi = params.api;
+  //   // console.log('Grid API initialized:', this.gridApi);
+  //   this.fetchUsers();
+  // }
 
   onCellValueChanged(event: any): void {
     if (!this.canUpdate) {
@@ -163,21 +147,20 @@ export class ManageRecordsComponent implements OnInit {
     }
   }
 
+  // Handle row deletion
   onDelete(userId: number): void {
-    // if (!this.canDelete) {
-    //   alert("You don't have permission to delete this record.");
-    //   return;
-    // }
-
     if (confirm('Are you sure you want to delete this record?')) {
       this.userService.deleteUser(userId).subscribe(
         () => {
-          // Remove the user from the array after successful deletion
           this.users = this.users.filter((user) => user.id !== userId);
-          this.rowData = [...this.users]; // Update the rowData for the AG Grid
+          this.gridData = {
+            data: this.users,
+            total: this.gridData.total,
+          };
+          alert('User deleted successfully');
         },
         (error) => {
-          console.error('Error deleting user:', error); // Handle errors
+          console.error('Error deleting user:', error);
         }
       );
     }
@@ -188,31 +171,24 @@ export class ManageRecordsComponent implements OnInit {
     if (!this.showModal) this.resetForm(); // Reset form when closing the modal
   }
 
+  // Create new user
   onCreateUser(): void {
-    if (this.createUserForm.invalid) return; // Check form validity
+    if (this.createUserForm.invalid) return;
 
     const newUser: User = this.createUserForm.value;
     this.userService.createUser(newUser).subscribe({
-      next: (response) => {
-        // Use `response` here, without specific type
-        const createdUser = response; // Access the nested 'data' key
-
-        this.users.push(createdUser); // Add the new user to the local array
-        console.log('User created successfully:', createdUser);
-
-        // Update the grid
-        if (this.gridApi) {
-          // this.gridApi.applyTransaction({ add: [createdUser] }); // Apply the transaction
-          this.fetchUsers(); 
-        } else {
-          console.error('Grid API is not initialized.');
-        }
-
-        // Close the modal
+      next: (createdUser) => {
+        this.users.push(createdUser);
+        this.gridData = {
+          data: this.users,
+          total: this.gridData.total,
+        };
         this.toggleModal();
-        console.log('Modal successfully closed.');
+        alert('User created successfully');
       },
-      error: (error) => console.error('Error creating user:', error),
+      error: (error) => {
+        console.error('Error creating user:', error);
+      },
     });
   }
 

@@ -13,21 +13,26 @@
   <p *ngIf="canUpdate" class="tertiary-text">* To update records click on the table cell you'd like to update.</p>
 
 <!-- User Records Table -->
-  <ag-grid-angular
-    #agGrid
-    style="width: 100%; height: 600px"
-    class="ag-theme-quartz mb-1"
-    [rowData]="users"
-    [columnDefs]="colDefs"
-    [defaultColDef]="defaultColDef"
-    [pagination]="pagination"
-    [paginationPageSizeSelector]="paginationPageSizeSelector"
-    [paginationPageSize]="paginationPageSize"
-    [rowHeight]="50"
-    (cellValueChanged)="onCellValueChanged($event)"
-    (gridReady)="onGridReady($event)"
-  >
-  </ag-grid-angular>
+
+<kendo-grid
+[data]="gridData"
+[pageSize]="state.take"
+[skip]="state.skip"
+[pageable]="{buttonCount:5,pageSizes:[5,10,50,100]}"
+(dataStateChange)="dataStateChange($event)"
+>
+  <kendo-grid-column field="id" title="ID" [width]="100" [filterable]="false"></kendo-grid-column>
+  <kendo-grid-column field="name" title="Name"></kendo-grid-column>
+  <kendo-grid-column field="email" title="Email"></kendo-grid-column>
+  <kendo-grid-column field="role" title="Role"></kendo-grid-column>
+  <!-- <kendo-grid-column
+    title="Action"
+    [filterable]="false"
+    [sortable]="false"
+  ></kendo-grid-column> -->
+</kendo-grid>
+
+
 </div>
 
 <!-- Modal for Creating User -->
