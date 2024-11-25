@@ -7,6 +7,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth/auth.interceptor';
+import { GridModule } from '@progress/kendo-angular-grid';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -22,8 +25,7 @@ import { DeleteButtonRendererComponent } from './delete-button-renderer/delete-b
 import { UpdateButtonRendererComponent } from './update-button-renderer/update-button-renderer.component';
 import { LayoutComponent } from './layout/layout.component';
 import { ManageRecordsComponent } from './manage-records/manage-records.component';
-import { GridModule } from '@progress/kendo-angular-grid';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 
 
@@ -53,6 +55,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     HttpClientModule,
     GridModule,
     BrowserAnimationsModule,
+    ToastrModule.forRoot({
+      positionClass: 'toast-top-right', 
+      preventDuplicates: true,
+    }),
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
