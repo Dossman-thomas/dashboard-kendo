@@ -26,9 +26,6 @@ import { UpdateButtonRendererComponent } from './update-button-renderer/update-b
 import { LayoutComponent } from './layout/layout.component';
 import { ManageRecordsComponent } from './manage-records/manage-records.component';
 
-
-
-
 @NgModule({
   declarations: [
     AppComponent,
