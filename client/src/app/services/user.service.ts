@@ -208,7 +208,7 @@ export class UserService {
   }
 
 
-  // Verify user password (if you choose to implement it)
+  // Verify user password
   checkPassword(userId: number, currentPassword: string): Observable<boolean> {
     return this.http
       .post<{ data: { isValid: boolean } }>(`${this.baseUrl}/check-password/${userId}`, { currentPassword }, {

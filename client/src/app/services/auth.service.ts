@@ -24,14 +24,6 @@ export class AuthService {
     window.addEventListener('popstate', this.handlePopStateEvent.bind(this));
   }
 
-  showSuccess(message: string, title: string) {
-    this.toastr.success(message, title);
-  }
-
-  showError(message: string, title: string) {
-    this.toastr.error(message, title);
-  }
-
   private checkInitialAuthState() {
     const token = localStorage.getItem('token');
     this.isLoggedInSubject.next(!!token); // Update the subject with the initial value
