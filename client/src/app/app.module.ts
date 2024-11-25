@@ -53,6 +53,7 @@ import { ManageRecordsComponent } from './manage-records/manage-records.componen
     GridModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot({
+      timeOut: 1500, // 1.5 second duration for toasts
       positionClass: 'toast-top-right', 
       preventDuplicates: true,
     }),
