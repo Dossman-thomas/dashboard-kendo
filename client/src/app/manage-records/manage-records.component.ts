@@ -20,7 +20,7 @@ export class ManageRecordsComponent implements OnInit {
   roles: string[] = ['admin', 'data manager', 'employee'];
   showPassword: boolean = false;
 
-  pagesize:any=[5,10,25,50,100];
+  // pagesize:any=[5,10,25,50,100];
   skip: number = 0;
   take: number = 10;
 
@@ -102,6 +102,8 @@ export class ManageRecordsComponent implements OnInit {
 
   public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
+    this.skip = state.skip!;
+    this.take = state.take!;
     this.loadUsers();
 }
 
@@ -113,8 +115,8 @@ export class ManageRecordsComponent implements OnInit {
         if (Array.isArray(response.rows)) {
           this.users = response.rows;
           this.gridData = {
-            data: this.users,
-            total: response.totalCount,
+            data: response.rows,
+            total: response.count,
           };
         } else {
           console.error('Expected rows array but got:', response);
@@ -187,6 +189,8 @@ export class ManageRecordsComponent implements OnInit {
         };
         this.toggleModal();
         alert('User created successfully');
+        this.loadUsers();
+
       },
       error: (error) => {
         console.error('Error creating user:', error);
