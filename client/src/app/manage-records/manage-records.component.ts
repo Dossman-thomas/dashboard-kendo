@@ -27,7 +27,7 @@ export class ManageRecordsComponent implements OnInit {
   // Permissions flags
   canCreate: boolean = false;
   canUpdate: boolean = false;
-  // canDelete: boolean = false;
+  canDelete: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -61,12 +61,12 @@ export class ManageRecordsComponent implements OnInit {
           if (permissions) {
             this.canCreate = permissions.canCreate;
             this.canUpdate = permissions.canUpdate;
-            // this.canDelete = permissions.canDelete;
+            this.canDelete = permissions.canDelete;
             
             // console.log(`Permissions for role '${currentUser.role}':`);
             console.log(`- Can create: ${this.canCreate}`);
             console.log(`- Can update: ${this.canUpdate}`);
-            // console.log(`- Can delete: ${this.canDelete}`);
+            console.log(`- Can delete: ${this.canDelete}`);
           } else {
             console.warn(`No permissions found for role: ${currentUser.role}`);
           }
