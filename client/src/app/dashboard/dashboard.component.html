@@ -36,28 +36,23 @@
     </div>
   </div>
 
-  <!-- <div class="col-md-3">
-      <div class="card text-white bg-success mb-3">
-        <div class="card-header">Admins</div>
-        <div class="card-body">
-          <h5 class="card-title">{{ adminCount }}</h5>
-        </div>
-      </div>
-    </div> -->
-
   <div class="row mt-3">
-    <div class="col-md-12">
-      <ag-grid-angular
-        style="width: 100%; height: 510px"
-        class="ag-theme-quartz"
-        [rowData]="rowData"
-        [columnDefs]="colDefs"
-        [pagination]="pagination"
-        [paginationPageSize]="paginationPageSize"
-        [paginationPageSizeSelector]="paginationPageSizeSelector"
-        [defaultColDef]="defaultColDef"
+    <div class="col-md-12" style="height: auto; max-height: 600px; overflow-y: auto; margin-bottom: 50px;">
+      <kendo-grid
+        [data]="gridData"
+        [pageSize]="state.take"
+        [skip]="state.skip"
+        [sortable]="true"
+        [filterable]="true"
+        [pageable]="{buttonCount:5,pageSizes:[5,10,25,50]}"
+        style="height: 100%;"
+        (dataStateChange)="dataStateChange($event)"
       >
-      </ag-grid-angular>
+        <kendo-grid-column field="id" title="ID" [width]="100"></kendo-grid-column>
+        <kendo-grid-column field="name" title="Name"></kendo-grid-column>
+        <kendo-grid-column field="email" title="Email"></kendo-grid-column>
+        <kendo-grid-column field="role" title="Role"></kendo-grid-column>
+      </kendo-grid>
     </div>
   </div>
 </div>

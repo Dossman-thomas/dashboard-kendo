@@ -18,11 +18,13 @@
 [data]="gridData"
 [pageSize]="state.take"
 [skip]="state.skip"
+[sortable]="true"
+[filterable]="true"
 [pageable]="{buttonCount:5,pageSizes:[5,10,25,50]}"
 (dataStateChange)="dataStateChange($event)"
 >
-  <kendo-grid-column field="id" title="ID" [width]="100" [filterable]="false"></kendo-grid-column>
-  <kendo-grid-column field="name" title="Name" [filterable]="true"></kendo-grid-column>
+  <kendo-grid-column field="id" title="ID" [width]="100"></kendo-grid-column>
+  <kendo-grid-column field="name" title="Name"></kendo-grid-column>
   <kendo-grid-column field="email" title="Email"></kendo-grid-column>
   <kendo-grid-column field="role" title="Role"></kendo-grid-column>
   <!-- <kendo-grid-column

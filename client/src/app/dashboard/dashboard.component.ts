@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService, User } from '../services/user.service';
-import { ColDef } from 'ag-grid-community';
+import { State } from '@progress/kendo-data-query';
+import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,24 +16,20 @@ export class DashboardComponent implements OnInit {
   employeeCount: number = 0;
   firstName: string = '';
 
-  paginationPageSizeSelector = [10, 25, 50, 100];
-  paginationPageSize = 10;
-  pagination = true;
+  // Kendo Grid settings
+  gridData: any = { data: [], total: 0 };
+  skip: number = 0;
+  take: number = 10;
 
-  defaultColDef: ColDef = {
-    flex: 1,
-    filter: true,
-    sortable: true,
+  // Kendo Grid state
+  public state: State = {
+    skip: this.skip,
+    take: this.take,
+    // filter: undefined,
+    // sort: undefined, 
   };
 
-  colDefs: ColDef[] = [
-    { field: 'id', headerName: 'ID' },
-    { field: 'name', headerName: 'Name' },
-    { field: 'email', headerName: 'Email' },
-    { field: 'role', headerName: 'Role' }
-  ];
-
-  rowData: User[] = [];
+  // rowData: User[] = [];
 
   constructor(private userService: UserService) {}
 
@@ -48,34 +45,42 @@ export class DashboardComponent implements OnInit {
     }
 
     // Fetch users from the API
-    this.fetchUsers();
+    this.loadUsers();
   }
 
-  // Method to fetch users via UserService
-  fetchUsers(): void {
-    this.userService.getAllUsers().subscribe({
+  // Load users with pagination and filters
+  loadUsers(): void {
+    const page = this.skip / this.take + 1;
+    this.userService.getAllUsers({ page, limit: this.take }).subscribe({
       next: (response: any) => {
-        // Check if response has rows and rows is an array
         if (Array.isArray(response.rows)) {
           const users = response.rows as User[];
           this.users = users;
-          this.totalUsers = response.count || users.length; // Use count from response if available
-          this.rowData = users;
+          this.totalUsers = response.count || users.length;
+          this.gridData = {
+            data: users,
+            total: response.count,
+          };
+          // Calculate role counts directly
           this.adminCount = users.filter(user => user.role === 'admin').length;
           this.dataManagerCount = users.filter(user => user.role === 'data manager').length;
           this.employeeCount = users.filter(user => user.role === 'employee').length;
         } else {
-          console.error('Expected an array but got:', response);
+          console.error('Expected rows array but got:', response);
         }
       },
       error: (error) => {
         console.error('Failed to fetch users:', error);
-      }
+      },
     });
   }
   
-  
-  
-  
-  
+
+  // Handle state changes for pagination, filtering, and sorting
+  public dataStateChange(state: DataStateChangeEvent): void {
+    this.state = state;
+    this.skip = state.skip!;
+    this.take = state.take!;
+    this.loadUsers();
+  }
 }
