@@ -9,12 +9,16 @@ import {
   getCurrentUser,
   checkEmailAvailability,
   checkCurrentPassword,
+  userStatCheck,
 } from "../controllers/index.js";
 
 export const userRouter = Router();
 
 // Create a new user route
 userRouter.post('/create-new', authenticateJWT, createUser); // endpoint: /api/users/create-new
+
+// User statistics route
+userRouter.get('/stats', authenticateJWT, userStatCheck); // endpoint: /api/users/stats
 
 // no duplicate email check route
 userRouter.post('/check-email/:id', authenticateJWT, checkEmailAvailability); // endpoint: /api/users/check-email
@@ -36,3 +40,4 @@ userRouter.get('/current-user/:id', authenticateJWT, getCurrentUser); // endpoin
 
 // Verify user password route
 userRouter.post('/check-password/:id', authenticateJWT, checkCurrentPassword); // endpoint: /api/users/check-password/:id
+

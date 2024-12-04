@@ -10,6 +10,7 @@ export {
   getCurrentUser,
   checkEmailAvailability,
   checkCurrentPassword,
+  userStatCheck,
 } from './user.controller.js';
 
 // Permissions

@@ -9,6 +9,7 @@ import {
   authenticateUserService,
   checkEmailAvailabilityService,
   passwordCheckService,
+  userStatCheckService,
 } from "../services/index.js";
 
 
@@ -255,6 +256,26 @@ export const checkCurrentPassword = async (req, res) => {
       statusCode: 200,
       message: messages.general.SUCCESS,
       data: { isValid: isPasswordValid }
+    });
+  } catch (error) {
+    console.error(error);
+    return response(res, {
+      statusCode: 500,
+      message: messages.general.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
+export const userStatCheck = async (req, res) => {
+  try {
+    // Fetch the user statistics using the service
+    const stats = await userStatCheckService();
+
+    // Respond with the statistics
+    return response(res, {
+      statusCode: 200,
+      message: messages.general.SUCCESS,
+      data: stats,
     });
   } catch (error) {
     console.error(error);

@@ -1,8 +1,9 @@
 // Import the user model
 import { UserModel } from "../database/models/user.model.js";
 import { pagination } from "../utils/common.util.js";
-import { Op } from "sequelize";
-import bcrypt from 'bcrypt';
+import { Op, where } from "sequelize";
+import bcrypt from "bcrypt";
+import Sequelize from "sequelize";
 
 // Create a new user
 export const createUserService = async (userData) => {
@@ -15,7 +16,7 @@ export const createUserService = async (userData) => {
       email: newUser.email,
       role: newUser.role,
       createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt
+      updatedAt: newUser.updatedAt,
     };
     return userResponse;
   } catch (error) {
@@ -74,14 +75,14 @@ export const updateUserService = async (id, updatedData) => {
       throw new Error("User not found");
     }
     await user.update(updatedData);
-    
+
     // Return updated user without password
     const userResponse = {
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
     };
     return userResponse;
   } catch (error) {
@@ -109,8 +110,8 @@ export const checkEmailAvailabilityService = async (email, currentUserId) => {
     const existingUser = await UserModel.findOne({
       where: {
         email,
-        id: { [Op.ne]: currentUserId } // exclude current user
-      }
+        id: { [Op.ne]: currentUserId }, // exclude current user
+      },
     });
     return !existingUser; // returns true if email is available, false if taken
   } catch (error) {
@@ -127,9 +128,9 @@ export const passwordCheckService = async (userId, currentPassword) => {
     }
 
     const user = await UserModel.findByPk(userId, {
-      attributes: ['id', 'name', 'email', 'password'] // Explicitly include password
+      attributes: ["id", "name", "email", "password"], // Explicitly include password
     });
-    
+
     if (!user) {
       throw new Error("User not found");
     }
@@ -140,11 +141,35 @@ export const passwordCheckService = async (userId, currentPassword) => {
     }
 
     // Use bcrypt to compare the provided password with the stored hashed password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
     return isPasswordValid;
   } catch (error) {
-    console.error('Password check error:', error);
+    console.error("Password check error:", error);
     throw error;
   }
 };
+
+// Get user statistics (count by role)
+export const userStatCheckService = async () => {
+  try {
+    const roles = ["admin", "data manager", "employee"];
+    const counts = {};
+
+    // Loop through roles and count occurrences
+    for (const role of roles) {
+      counts[`${role.replace(" ", "")}Count`] = await UserModel.count({
+        where: { role },
+      });
+    }
+
+    return counts;
+  } catch (error) {
+    throw new Error(`Failed to fetch user statistics: ${error.message}`);
+  }
+};
+
+

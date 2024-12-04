@@ -6,6 +6,7 @@ export {
   deleteUserService,
   checkEmailAvailabilityService,
   passwordCheckService,
+  userStatCheckService,
 } from "./user.service.js";
 
 export {
