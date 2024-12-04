@@ -16,6 +16,13 @@ export interface User {
   role: string;
   password: string;
 }
+
+export interface RoleStatistics {
+  adminCount: number;
+  datamanagerCount: number;
+  employeeCount: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -109,21 +116,7 @@ export class UserService {
       );
   }
 
-  // Get all users
-  // getAllUsers(): Observable<User[]> {
-  //   return this.http
-  //     .get<any>(`${this.baseUrl}`, { headers: this.getHeaders() })
-  //     .pipe(
-  //       map((res) => res.data), // Extract the 'data' property
-  //       catchError((error) => {
-  //         console.log('Error fetching users:', error); // Log the error
-  //         return throwError(
-  //           () => new Error('Failed to fetch users. Please try again later.')
-  //         ); // Return an observable error
-  //       })
-  //     );
-  // }
-
+  // Get all users with pagination
   getAllUsers(params?: { page: number; limit: number }): Observable<User[]> {
     const options = {
       headers: this.getHeaders(),
@@ -144,7 +137,6 @@ export class UserService {
         })
       );
   }
-  
 
   // Update user information and reset the current user in localStorage
   updateUser(id: number, userData: User): Observable<User> {
@@ -196,6 +188,7 @@ export class UserService {
       );
   }
 
+  // Check if an email is available
   checkEmailAvailability(email: string, currentUserId: number): Observable<boolean> {
     return this.http
       .post<{ data: { isAvailable: boolean } }>(`${this.baseUrl}/check-email/${currentUserId}`, { email }, {
@@ -206,7 +199,6 @@ export class UserService {
         catchError(this.handleError<boolean>('checkEmailAvailability'))
       );
   }
-
 
   // Verify user password
   checkPassword(userId: number, currentPassword: string): Observable<boolean> {
@@ -220,11 +212,24 @@ export class UserService {
       );
   }
 
+  // Fetch user role statistics
+  getRoleStatistics(): Observable<RoleStatistics> {
+    return this.http
+      .get<any>(`${this.baseUrl}/stats`, {
+        headers: this.getHeaders(),
+      })
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError<RoleStatistics>('getRoleStatistics'))
+      );
+  }
+
   // Error handling method
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
-      console.error(error);
-      return of(result as T);
+      console.error(`${operation} failed: ${error.message}`);
+      // Optionally add user-facing feedback or analytics tracking here.
+      return throwError(() => new Error(`Error during ${operation}: ${error.message}`));
     };
   }
-}
+}  
