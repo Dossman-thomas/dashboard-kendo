@@ -67,7 +67,9 @@
         >
           * Please enter a valid email address.
         </div>
-        <div *ngIf="emailAvailable === false" class="text-danger">{{ emailErrorMessage }}</div>
+        <div *ngIf="emailAvailable === false" class="text-danger">
+          {{ emailErrorMessage }}
+        </div>
       </div>
 
       <div class="d-flex flex-column">
@@ -156,21 +158,21 @@
           <label for="confirmNewPassword">Confirm New Password:</label>
           <div class="input-group">
             <input
-            id="confirmNewPassword"
-            [type]="showConfirmNewPassword ? 'text' : 'password'"
-            class="form-control my-2 pass-inputs"
-            formControlName="confirmNewPassword"
-          />
-          <span
-          class="input-group-text eye-icon my-2"
-          (click)="toggleConfirmNewPasswordVisibility()"
-          style="cursor: pointer"
-        >
-          <i
-            class="fa"
-            [ngClass]="showConfirmNewPassword ? 'fa-eye-slash' : 'fa-eye'"
-          ></i>
-        </span>
+              id="confirmNewPassword"
+              [type]="showConfirmNewPassword ? 'text' : 'password'"
+              class="form-control my-2 pass-inputs"
+              formControlName="confirmNewPassword"
+            />
+            <span
+              class="input-group-text eye-icon my-2"
+              (click)="toggleConfirmNewPasswordVisibility()"
+              style="cursor: pointer"
+            >
+              <i
+                class="fa"
+                [ngClass]="showConfirmNewPassword ? 'fa-eye-slash' : 'fa-eye'"
+              ></i>
+            </span>
           </div>
 
           <div

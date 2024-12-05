@@ -2,9 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { UserService, User } from '../services/user.service';
 import { PermissionsService } from '../services/permissions.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DataStateChangeEvent, FilterableSettings } from '@progress/kendo-angular-grid';
+import {
+  DataStateChangeEvent,
+  FilterableSettings,
+} from '@progress/kendo-angular-grid';
 import { State } from '@progress/kendo-data-query';
 import { ToastrService } from 'ngx-toastr';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-manage-records',
@@ -12,7 +16,6 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./manage-records.component.css'],
 })
 export class ManageRecordsComponent implements OnInit {
-
   users: User[] = [];
   gridData: any = { data: [], total: 0 };
   showModal: boolean = false; // show/hide create modal
@@ -22,13 +25,15 @@ export class ManageRecordsComponent implements OnInit {
   selectedUser!: User | null; // User currently being edited
   roles: string[] = ['admin', 'data manager', 'employee'];
   showPassword: boolean = false;
+  emailAvailable: boolean = false;
+  emailErrorMessage: string = '';
 
   // Pagination settings
   skip: number = 0;
   take: number = 10;
 
   // Filter settings
-  public filterMode: FilterableSettings = 'menu'; 
+  public filterMode: FilterableSettings = 'menu';
 
   // Permissions flags
   canCreate: boolean = false;
@@ -39,7 +44,7 @@ export class ManageRecordsComponent implements OnInit {
     private userService: UserService,
     private fb: FormBuilder,
     private permissionsService: PermissionsService,
-    private toastr: ToastrService,
+    private toastr: ToastrService
   ) {}
 
   public state: State = {
@@ -57,20 +62,22 @@ export class ManageRecordsComponent implements OnInit {
   setPermissions(): void {
     const currentUser = this.userService.getCurrentUser();
     if (currentUser) {
-      this.permissionsService.getPermissionsForRole(currentUser.role).subscribe({
-        next: (permissions) => {
-          if (permissions) {
-            this.canCreate = permissions.canCreate;
-            this.canUpdate = permissions.canUpdate;
-            this.canDelete = permissions.canDelete;
-          } else {
-            console.warn('Permissions are undefined.');
-          }
-        },
-        error: (error) => {
-          console.error('Error fetching permissions:', error);
-        },
-      });
+      this.permissionsService
+        .getPermissionsForRole(currentUser.role)
+        .subscribe({
+          next: (permissions) => {
+            if (permissions) {
+              this.canCreate = permissions.canCreate;
+              this.canUpdate = permissions.canUpdate;
+              this.canDelete = permissions.canDelete;
+            } else {
+              console.warn('Permissions are undefined.');
+            }
+          },
+          error: (error) => {
+            console.error('Error fetching permissions:', error);
+          },
+        });
     } else {
       console.warn('No current user found. Unable to set permissions.');
     }
@@ -156,7 +163,7 @@ export class ManageRecordsComponent implements OnInit {
             data: this.users,
             total: this.gridData.total,
           };
-          this.toastr.success('User deleted successfully');
+          this.toastr.success('User deleted successfully.');
         },
         (error) => {
           this.toastr.error('Failed to delete user. Please try again.');
@@ -166,55 +173,81 @@ export class ManageRecordsComponent implements OnInit {
     }
   }
 
-  // Create new user
+  // Create new user with email check
   onCreateUser(): void {
     if (this.createUserForm.invalid) return;
 
     const newUser: User = this.createUserForm.value;
-    this.userService.createUser(newUser).subscribe({
-      next: (createdUser) => {
-        this.users.push(createdUser);
-        this.gridData = {
-          data: this.users,
-          total: this.gridData.total,
-        };
-        this.toggleModal();
-        this.toastr.success('User created successfully!');
-        this.loadUsers();
-      },
-      error: (error) => {
-        this.toastr.error('Failed to create user. Please try again.');
-        console.error('Error creating user:', error);
-      },
+    this.checkEmailAvailability(newUser.email).subscribe((isAvailable: boolean) => {
+      if (isAvailable) {
+        this.userService.createUser(newUser).subscribe({
+          next: (createdUser) => {
+            this.users.push(createdUser);
+            this.gridData = {
+              data: this.users,
+              total: this.gridData.total,
+            };
+            this.toggleModal();
+            this.toastr.success('User created successfully!');
+            this.loadUsers();
+          },
+          error: (error) => {
+            this.toastr.error('Failed to create user. Please try again.');
+            console.error('Error creating user:', error);
+          },
+        });
+      } else {
+        this.emailErrorMessage =
+          'This email is already in use. Please choose a different one.';
+      }
     });
   }
 
-  // Update existing user
+  // Update existing user with email check
   onUpdateUser(): void {
     if (this.editUserForm.invalid || !this.selectedUser) return;
-  
+
     const updatedUser: User = {
       ...this.selectedUser,
       ...this.editUserForm.value,
     };
-  
-    if (updatedUser.id !== undefined) {
-      this.userService.updateUser(updatedUser.id, updatedUser).subscribe({
-        next: () => {
-          this.toastr.success('User updated successfully!');
-          this.showEditModal = false;
-          this.loadUsers();
-        },
-        error: (error) => {
-          this.toastr.error('Failed to update user. Please try again.');
-          console.error('Error updating user:', error);
-        },
-      });
-    } else {
-      console.error('User ID is undefined');
-    }
+
+    this.checkEmailAvailability(updatedUser.email).subscribe(
+      (isAvailable: boolean) => {
+        if (isAvailable) {
+          if (updatedUser.id !== undefined) {
+            this.userService.updateUser(updatedUser.id, updatedUser).subscribe({
+              next: () => {
+                this.toastr.success('User updated successfully!');
+                this.showEditModal = false;
+                this.loadUsers();
+              },
+              error: (error) => {
+                this.toastr.error('Failed to update user. Please try again.');
+                console.error('Error updating user:', error);
+              },
+            });
+          } else {
+            console.error('User ID is undefined');
+          }
+        } else {
+          this.emailErrorMessage =
+            'This email is already in use. Please choose a different one.';
+        }
+      }
+    );
   }
-  
+
+// Helper method for checking email availability with current user ID
+private checkEmailAvailability(email: string): any {
+  const currentUser = this.userService.getCurrentUser();
+  if (currentUser && currentUser.id !== undefined) {
+    return this.userService.checkEmailAvailability(email, currentUser.id);
+  } else {
+    console.error('Current user ID is undefined');
+    return of(false); // Return an observable with a false value if currentUser is not defined
+  }
+}
 
   toggleModal() {
     this.showModal = !this.showModal;
