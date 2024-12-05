@@ -4,6 +4,7 @@ import { PermissionsService } from '../services/permissions.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DataStateChangeEvent, FilterableSettings } from '@progress/kendo-angular-grid';
 import { State } from '@progress/kendo-data-query';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-manage-records',
@@ -14,16 +15,19 @@ export class ManageRecordsComponent implements OnInit {
 
   users: User[] = [];
   gridData: any = { data: [], total: 0 };
-  showModal: boolean = false; // show/hide modal
+  showModal: boolean = false; // show/hide create modal
+  showEditModal: boolean = false; // show/hide edit modal
   createUserForm!: FormGroup; // Form group for creating a new user
+  editUserForm!: FormGroup; // Form group for editing a user
+  selectedUser!: User | null; // User currently being edited
   roles: string[] = ['admin', 'data manager', 'employee'];
   showPassword: boolean = false;
 
-  // pagesize:any=[5,10,25,50,100];
+  // Pagination settings
   skip: number = 0;
   take: number = 10;
 
-  // filter settings
+  // Filter settings
   public filterMode: FilterableSettings = 'menu'; 
 
   // Permissions flags
@@ -34,44 +38,33 @@ export class ManageRecordsComponent implements OnInit {
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
-    private permissionsService: PermissionsService
+    private permissionsService: PermissionsService,
+    private toastr: ToastrService,
   ) {}
 
-  // Pagination settings
   public state: State = {
     skip: this.skip,
     take: this.take,
-    sort: [],
   };
 
-
   ngOnInit() {
-    this.initializeForm();
+    this.initializeForms();
     this.setPermissions();
     this.loadUsers();
   }
 
   // Fetch current user's permissions
   setPermissions(): void {
-    // console.log('Fetching current user for permissions...');
-    
     const currentUser = this.userService.getCurrentUser();
     if (currentUser) {
-      console.log(`Current user role: ${currentUser.role}`);
-      
       this.permissionsService.getPermissionsForRole(currentUser.role).subscribe({
         next: (permissions) => {
           if (permissions) {
             this.canCreate = permissions.canCreate;
             this.canUpdate = permissions.canUpdate;
             this.canDelete = permissions.canDelete;
-            
-            // console.log(`Permissions for role '${currentUser.role}':`);
-            console.log(`- Can create: ${this.canCreate}`);
-            console.log(`- Can update: ${this.canUpdate}`);
-            console.log(`- Can delete: ${this.canDelete}`);
           } else {
-            console.warn(`No permissions found for role: ${currentUser.role}`);
+            console.warn('Permissions are undefined.');
           }
         },
         error: (error) => {
@@ -82,10 +75,9 @@ export class ManageRecordsComponent implements OnInit {
       console.warn('No current user found. Unable to set permissions.');
     }
   }
-  
 
-  // Initialize the create user form
-  initializeForm() {
+  // Initialize the forms
+  initializeForms() {
     this.createUserForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -101,6 +93,12 @@ export class ManageRecordsComponent implements OnInit {
         ],
       ],
     });
+
+    this.editUserForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      role: ['', Validators.required],
+    });
   }
 
   public dataStateChange(state: DataStateChangeEvent): void {
@@ -108,7 +106,7 @@ export class ManageRecordsComponent implements OnInit {
     this.skip = state.skip!;
     this.take = state.take!;
     this.loadUsers();
-}
+  }
 
   // Load users with pagination and filters
   loadUsers() {
@@ -131,28 +129,22 @@ export class ManageRecordsComponent implements OnInit {
     });
   }
 
-  // onGridReady(params: any) {
-  //   this.gridApi = params.api;
-  //   // console.log('Grid API initialized:', this.gridApi);
-  //   this.fetchUsers();
+  // onUpdate(event: any): void {
+  //   if (!this.canUpdate) {
+  //     console.error('You do not have permission to update this record.');
+  //     return;
+  //   }
+
+  //   const updatedUser: User = event.data;
+  //   if (updatedUser.id) {
+  //     this.userService.updateUser(updatedUser.id, updatedUser).subscribe({
+  //       next: () => alert('User updated successfully!'),
+  //       error: (error) => console.error('Error updating user:', error),
+  //     });
+  //   } else {
+  //     console.error('User ID is undefined');
+  //   }
   // }
-
-  onUpdate(event: any): void {
-    if (!this.canUpdate) {
-      console.error('You do not have permission to update this record.');
-      return;
-    }
-
-    const updatedUser: User = event.data;
-    if (updatedUser.id) {
-      this.userService.updateUser(updatedUser.id, updatedUser).subscribe({
-        next: () => alert('User updated successfully!'),
-        error: (error) => console.error('Error updating user:', error),
-      });
-    } else {
-      console.error('User ID is undefined');
-    }
-  }
 
   // Handle row deletion
   onDelete(userId: number): void {
@@ -164,18 +156,14 @@ export class ManageRecordsComponent implements OnInit {
             data: this.users,
             total: this.gridData.total,
           };
-          alert('User deleted successfully');
+          this.toastr.success('User deleted successfully');
         },
         (error) => {
+          this.toastr.error('Failed to delete user. Please try again.');
           console.error('Error deleting user:', error);
         }
       );
     }
-  }
-
-  toggleModal() {
-    this.showModal = !this.showModal;
-    if (!this.showModal) this.resetForm(); // Reset form when closing the modal
   }
 
   // Create new user
@@ -191,18 +179,61 @@ export class ManageRecordsComponent implements OnInit {
           total: this.gridData.total,
         };
         this.toggleModal();
-        alert('User created successfully');
+        this.toastr.success('User created successfully!');
         this.loadUsers();
-
       },
       error: (error) => {
+        this.toastr.error('Failed to create user. Please try again.');
         console.error('Error creating user:', error);
       },
     });
   }
 
-  resetForm() {
-    this.createUserForm.reset(); // Reset form fields
+  // Update existing user
+  onUpdateUser(): void {
+    if (this.editUserForm.invalid || !this.selectedUser) return;
+  
+    const updatedUser: User = {
+      ...this.selectedUser,
+      ...this.editUserForm.value,
+    };
+  
+    if (updatedUser.id !== undefined) {
+      this.userService.updateUser(updatedUser.id, updatedUser).subscribe({
+        next: () => {
+          this.toastr.success('User updated successfully!');
+          this.showEditModal = false;
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.toastr.error('Failed to update user. Please try again.');
+          console.error('Error updating user:', error);
+        },
+      });
+    } else {
+      console.error('User ID is undefined');
+    }
+  }
+  
+
+  toggleModal() {
+    this.showModal = !this.showModal;
+    if (!this.showModal) this.resetCreateForm();
+  }
+
+  toggleEditModal(user?: User) {
+    this.showEditModal = !this.showEditModal;
+    if (user) {
+      this.selectedUser = user;
+      this.editUserForm.patchValue(user);
+    } else {
+      this.selectedUser = null;
+      this.editUserForm.reset();
+    }
+  }
+
+  resetCreateForm() {
+    this.createUserForm.reset();
   }
 
   togglePasswordVisibility(): void {

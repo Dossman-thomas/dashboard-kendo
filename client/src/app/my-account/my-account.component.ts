@@ -34,12 +34,15 @@ export class MyAccountComponent implements OnInit {
 
     this.passwordForm = this.fb.group({
       currentPassword: ['', Validators.required],
-      newPassword: ['', [
-        Validators.required,
-        Validators.minLength(7),
-        Validators.maxLength(15),
-        this.passwordValidator
-      ]],
+      newPassword: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(7),
+          Validators.maxLength(15),
+          this.passwordValidator,
+        ],
+      ],
       confirmNewPassword: ['', Validators.required],
     });
   }
@@ -84,28 +87,35 @@ export class MyAccountComponent implements OnInit {
         email: this.userForm.value.email,
       };
 
-      this.checkEmailAvailability(updatedUser.email).subscribe((isAvailable: boolean) => {
-        if (isAvailable) {
-          if (this.currentUser?.id !== undefined) {
-            this.userService.updateUser(this.currentUser.id, updatedUser).subscribe({
-              next: (user) => {
-                console.log('User updated:', user);
-                this.userService.setCurrentUser(user); // Update the current user in UserService
-                this.toastr.success('Account updated successfully!');
-                this.isEditing = false;
-              },
-              error: (error) => {
-                console.error('Error updating user:', error);
-                this.toastr.error('Failed to update account. Please try again.');
-              },
-            });
+      this.checkEmailAvailability(updatedUser.email).subscribe(
+        (isAvailable: boolean) => {
+          if (isAvailable) {
+            if (this.currentUser?.id !== undefined) {
+              this.userService
+                .updateUser(this.currentUser.id, updatedUser)
+                .subscribe({
+                  next: (user) => {
+                    console.log('User updated:', user);
+                    this.userService.setCurrentUser(user); // Update the current user in UserService
+                    this.toastr.success('Account updated successfully!');
+                    this.isEditing = false;
+                  },
+                  error: (error) => {
+                    console.error('Error updating user:', error);
+                    this.toastr.error(
+                      'Failed to update account. Please try again.'
+                    );
+                  },
+                });
+            } else {
+              console.error('User ID is undefined');
+            }
           } else {
-            console.error('User ID is undefined');
+            this.emailErrorMessage =
+              "The email you've chosen is already in use. Please choose a different email.";
           }
-        } else {
-          this.emailErrorMessage = 'The email you\'ve chosen is already in use. Please choose a different email.';
         }
-      });
+      );
     }
   }
 
@@ -121,21 +131,22 @@ export class MyAccountComponent implements OnInit {
 
   onSubmitNewPassword(): void {
     if (!this.currentUser) return;
-  
-    const { currentPassword, newPassword, confirmNewPassword } = this.passwordForm.value;
-  
+
+    const { currentPassword, newPassword, confirmNewPassword } =
+      this.passwordForm.value;
+
     // Validate form
     if (this.passwordForm.invalid) {
       this.passwordError = 'Please fill out all required fields correctly.';
       return;
     }
-  
+
     // Check if new passwords match
     if (newPassword !== confirmNewPassword) {
       this.passwordError = 'New passwords do not match.';
       return;
     }
-  
+
     // Ensure user ID is a number and not undefined
     const userId = this.currentUser.id;
     if (userId === undefined) {
@@ -143,21 +154,22 @@ export class MyAccountComponent implements OnInit {
       this.passwordError = 'Unable to update password. User ID is missing.';
       return;
     }
-  
+
     // Use the checkPassword method to verify current password
     this.userService.checkPassword(userId, currentPassword).subscribe({
       next: (isPasswordValid) => {
         if (!isPasswordValid) {
-          this.passwordError = 'Current password is incorrect. Please try again.';
+          this.passwordError =
+            'Current password is incorrect. Please try again.';
           return;
         }
-  
+
         // If password is valid, proceed with update
         const updatedUser: User = {
           ...this.currentUser!,
           password: newPassword,
         };
-  
+
         this.userService.updateUser(userId, updatedUser).subscribe({
           next: () => {
             console.log('Password updated successfully.');
@@ -173,8 +185,9 @@ export class MyAccountComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error checking password:', error);
-        this.passwordError = 'An error occurred while verifying your current password.';
-      }
+        this.passwordError =
+          'An error occurred while verifying your current password.';
+      },
     });
   }
 
@@ -192,7 +205,10 @@ export class MyAccountComponent implements OnInit {
 
   private checkEmailAvailability(email: string): any {
     if (this.currentUser?.id !== undefined) {
-      return this.userService.checkEmailAvailability(email, this.currentUser.id);
+      return this.userService.checkEmailAvailability(
+        email,
+        this.currentUser.id
+      );
     }
     return of(false); // or handle the undefined case appropriately
   }
