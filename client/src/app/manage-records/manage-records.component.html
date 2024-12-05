@@ -10,7 +10,7 @@
     <button class="btn create-user-btn" *ngIf="canCreate" (click)="toggleModal()">Create User</button>
   </div>
 
-  <p *ngIf="canUpdate" class="tertiary-text">* To update records click on the table cell you'd like to update.</p>
+  <!-- <p *ngIf="canUpdate" class="tertiary-text">* To update records click on the table cell you'd like to update.</p> -->
 
 <!-- User Records Table -->
 
@@ -19,19 +19,32 @@
 [pageSize]="state.take"
 [skip]="state.skip"
 [sortable]="true"
-[filterable]="true"
+[filterable]="filterMode"
 [pageable]="{buttonCount:5,pageSizes:[5,10,25,50]}"
 (dataStateChange)="dataStateChange($event)"
 >
   <kendo-grid-column field="id" title="ID" [width]="100"></kendo-grid-column>
+  <kendo-grid-command-column title="Action" [width]="100">
+    <ng-template kendoGridCellTemplate let-dataItem>
+      <!-- Edit Button -->
+      <button kendoGridEditCommand
+        class="btn btn-sm btn-primary" 
+        *ngIf="canUpdate" 
+        (click)="onUpdate(dataItem)">
+        <i class="fa fa-pencil" aria-hidden="true"></i>
+      </button>
+      <!-- Delete Button -->
+      <button kendoGridRemoveCommand
+        class="btn btn-sm btn-danger ms-2" 
+        *ngIf="canDelete" 
+        (click)="onDelete(dataItem.id)">
+        <i class="fa fa-trash" aria-hidden="true"></i>
+      </button>
+    </ng-template>
+  </kendo-grid-command-column>
   <kendo-grid-column field="name" title="Name"></kendo-grid-column>
   <kendo-grid-column field="email" title="Email"></kendo-grid-column>
   <kendo-grid-column field="role" title="Role"></kendo-grid-column>
-  <!-- <kendo-grid-column
-    title="Action"
-    [filterable]="false"
-    [sortable]="false"
-  ></kendo-grid-column> -->
 </kendo-grid>
 
 

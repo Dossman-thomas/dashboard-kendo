@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService, User } from '../services/user.service';
 import { PermissionsService } from '../services/permissions.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
+import { DataStateChangeEvent, FilterableSettings } from '@progress/kendo-angular-grid';
 import { State } from '@progress/kendo-data-query';
-import { DeleteButtonRendererComponent } from '../delete-button-renderer/delete-button-renderer.component';
 
 @Component({
   selector: 'app-manage-records',
@@ -24,6 +23,9 @@ export class ManageRecordsComponent implements OnInit {
   skip: number = 0;
   take: number = 10;
 
+  // filter settings
+  public filterMode: FilterableSettings = 'menu'; 
+
   // Permissions flags
   canCreate: boolean = false;
   canUpdate: boolean = false;
@@ -38,7 +40,8 @@ export class ManageRecordsComponent implements OnInit {
   // Pagination settings
   public state: State = {
     skip: this.skip,
-    take: this.take
+    take: this.take,
+    sort: [],
   };
 
 
@@ -134,7 +137,7 @@ export class ManageRecordsComponent implements OnInit {
   //   this.fetchUsers();
   // }
 
-  onCellValueChanged(event: any): void {
+  onUpdate(event: any): void {
     if (!this.canUpdate) {
       console.error('You do not have permission to update this record.');
       return;

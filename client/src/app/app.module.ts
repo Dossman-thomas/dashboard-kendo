@@ -58,9 +58,9 @@ import { ManageRecordsComponent } from './manage-records/manage-records.componen
       preventDuplicates: true,
     }),
   ],
-  providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+  providers: [ 
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, // Add the AuthInterceptor to the providers array
   ],
-  bootstrap: [AppComponent],
+  bootstrap: [AppComponent], // Start with the AppComponent
 })
 export class AppModule {}

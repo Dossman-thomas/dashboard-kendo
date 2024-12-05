@@ -3,7 +3,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {
   Observable,
   BehaviorSubject,
-  of,
   map,
   catchError,
   throwError,
