@@ -1,9 +1,9 @@
 // Import the user model
 import { UserModel } from "../database/models/user.model.js";
 import { pagination } from "../utils/common.util.js";
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import bcrypt from "bcrypt";
-import Sequelize from "sequelize";
+
 
 // Create a new user
 export const createUserService = async (userData) => {
@@ -37,7 +37,7 @@ export const getUserByIdService = async (id) => {
   }
 };
 
-// Get all users with pagination
+// Get all users with pagination, filtering, and sorting
 export const getAllUsersService = async ({
   page,
   limit,
@@ -46,16 +46,24 @@ export const getAllUsersService = async ({
   order,
 }) => {
   try {
+    // Default values
+    const validSortFields = ['id', 'name', 'email', 'role'];
+    const validOrderValues = ['ASC', 'DESC'];
+
+    // Validate sortBy and order inputs
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'role';
+    const sortOrder = validOrderValues.includes(order.toUpperCase()) ? order.toUpperCase() : 'ASC';
+
     const users = await UserModel.findAndCountAll({
       where: {
         [Op.or]: [
-          { name: { [Op.like]: `%${searchQuery}%` } }, // search by name
-          { email: { [Op.like]: `%${searchQuery}%` } }, // search by email
+          { name: { [Op.like]: `%${searchQuery}%` } },
+          { email: { [Op.like]: `%${searchQuery}%` } },
         ],
       },
-      order: [[sortBy, order]], // sort by the specified field and order
-      ...pagination({ page, limit }), // use pagination function to limit results
-      logging: console.log,
+      order: [[sortField, sortOrder]],
+      ...pagination({ page, limit }),
+      logging: console.log, // Logs query execution
     });
 
     return users;

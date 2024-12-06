@@ -116,10 +116,10 @@ export const getAllUsers = async (req, res) => {
   try {
     const { 
       page = 1, 
-      limit = 20, 
+      limit = 10, 
       searchQuery = "", 
-      sortBy = "createdAt", 
-      order = 'DESC',
+      sortBy = "role", 
+      order = 'ASC',
     } = req.query;
     const users = await getAllUsersService({
       page: parseInt(page, 10),
