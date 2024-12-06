@@ -40,10 +40,11 @@
     <div class="col-md-12" style="height: auto; max-height: 600px; overflow-y: auto; margin-bottom: 50px;">
       <kendo-grid
         [data]="gridData"
-        [pageSize]="state.take"
-        [skip]="state.skip"
+        [pageSize]="take"
+        [skip]="skip"
         [sortable]="true"
-        [filterable]="true"
+        filterable="menu"
+        [filter]="filter"
         [pageable]="{buttonCount:5,pageSizes:[5,10,25,50]}"
         style="height: 100%;"
         (dataStateChange)="dataStateChange($event)"

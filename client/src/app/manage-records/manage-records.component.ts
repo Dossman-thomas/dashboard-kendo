@@ -117,7 +117,7 @@ export class ManageRecordsComponent implements OnInit {
 
   // Load users with pagination and filters
   loadUsers() {
-    const page = this.skip / this.take + 1;
+    const page = (this.skip + this.take) / this.take; // Calculate page number
     this.userService.getAllUsers({ page, limit: this.take }).subscribe({
       next: (response: any) => {
         if (Array.isArray(response.rows)) {
