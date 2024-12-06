@@ -116,26 +116,61 @@ export class UserService {
   }
 
   // Get all users with pagination
-  getAllUsers(params?: { page: number; limit: number }): Observable<User[]> {
-    const options = {
-      headers: this.getHeaders(),
-      params: params
-        ? { page: params.page.toString(), limit: params.limit.toString() }
-        : undefined,
-    };
+  // getAllUsers(params?: { page: number; limit: number }): Observable<User[]> {
+  //   const options = {
+  //     headers: this.getHeaders(),
+  //     params: params
+  //       ? { page: params.page.toString(), limit: params.limit.toString() }
+  //       : undefined,
+  //   };
   
-    return this.http
-      .get<any>(`${this.baseUrl}`, options)
-      .pipe(
-        map((res) => res.data), // Extract the 'data' property
-        catchError((error) => {
-          console.log('Error fetching users:', error);
-          return throwError(
-            () => new Error('Failed to fetch users. Please try again later.')
-          );
-        })
-      );
-  }
+  //   return this.http
+  //     .get<any>(`${this.baseUrl}`, options)
+  //     .pipe(
+  //       map((res) => res.data), // Extract the 'data' property
+  //       catchError((error) => {
+  //         console.log('Error fetching users:', error);
+  //         return throwError(
+  //           () => new Error('Failed to fetch users. Please try again later.')
+  //         );
+  //       })
+  //     );
+  // }
+
+  // Get all users with pagination, filtering, and sorting
+getAllUsers(params?: { 
+  page: number; 
+  limit: number; 
+  searchQuery?: string; 
+  sortBy?: string; 
+  order?: 'ASC' | 'DESC'; 
+}): Observable<User[]> {
+  const options = {
+    headers: this.getHeaders(),
+    params: params
+      ? {
+          page: params.page.toString(),
+          limit: params.limit.toString(),
+          ...(params.searchQuery && { searchQuery: params.searchQuery }), // Add searchQuery if provided
+          ...(params.sortBy && { sortBy: params.sortBy }), // Add sortBy if provided
+          ...(params.order && { order: params.order }), // Add order if provided
+        }
+      : undefined,
+  };
+
+  return this.http
+    .get<any>(`${this.baseUrl}`, options)
+    .pipe(
+      map((res) => res.data), // Extract the 'data' property
+      catchError((error) => {
+        console.error('Error fetching users:', error);
+        return throwError(
+          () => new Error('Failed to fetch users. Please try again later.')
+        );
+      })
+    );
+}
+
 
   // Update user information and reset the current user in localStorage
   updateUser(id: number, userData: User): Observable<User> {
