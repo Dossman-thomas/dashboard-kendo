@@ -65,7 +65,7 @@ export class DashboardComponent implements OnInit {
       searchQuery: this.filter.filterValue, // Use the filter value
       sortBy: this.state.sort?.[0]?.field || 'createdAt', // Default to 'createdAt'
       order:
-        (this.state.sort?.[0]?.dir?.toUpperCase() as 'DESC' | 'ASC') || 'ASC', // Default to 'DESC'
+        (this.state.sort?.[0]?.dir?.toUpperCase() as 'DESC' | 'ASC') || '', // Default to 'DESC'
     };
 
     this.userService.getAllUsers(params).subscribe({

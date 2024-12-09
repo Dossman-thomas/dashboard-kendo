@@ -23,10 +23,6 @@ export const UserModel = sequelize.define('users', {
     password: {
         type: DataTypes.STRING,
         allowNull: false,
-        // // exclude from JSON serialization
-        // get() {
-        //     return undefined;
-        // }
     },
     role: {
         type: DataTypes.ENUM('admin', 'data manager', 'employee'),
@@ -34,7 +30,7 @@ export const UserModel = sequelize.define('users', {
     },
 }, {
     freezeTableName: true,
-    timestamps: true,
+    timestamps: true, // automatically includes createdAt and updatedAt
     // explicitly exclude password in toJSON method
     defaultScope: {
         attributes: ['id', 'name', 'email', 'role'], // exclude password from default query

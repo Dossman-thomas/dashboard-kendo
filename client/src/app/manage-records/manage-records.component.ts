@@ -193,6 +193,7 @@ export class ManageRecordsComponent implements OnInit {
           },
           error: (error) => {
             this.toastr.error('Failed to create user. Please try again.');
+            this.emailErrorMessage = 'This email is already in use. Please choose a different one.';
             console.error('Error creating user:', error);
           },
         });
@@ -205,65 +206,80 @@ export class ManageRecordsComponent implements OnInit {
 
   // Update existing user with email check
   onUpdateUser(): void {
-    if (this.editUserForm.invalid || !this.selectedUser) return;
+  if (this.editUserForm.invalid || !this.selectedUser) return;
 
-    const updatedUser: User = {
-      ...this.selectedUser,
-      ...this.editUserForm.value,
-    };
+  const updatedUser: User = {
+    ...this.selectedUser,
+    ...this.editUserForm.value,
+  };
 
-    this.checkEmailAvailability(updatedUser.email).subscribe(
-      (isAvailable: boolean) => {
-        if (isAvailable) {
-          if (updatedUser.id !== undefined) {
-            this.userService.updateUser(updatedUser.id, updatedUser).subscribe({
-              next: () => {
-                this.toastr.success('User updated successfully!');
-                this.showEditModal = false;
-                this.loadUsers();
-              },
-              error: (error) => {
-                this.toastr.error('Failed to update user. Please try again.');
-                console.error('Error updating user:', error);
-              },
-            });
-          } else {
-            console.error('User ID is undefined');
-          }
-        } else {
-          this.emailErrorMessage =
-            'This email is already in use. Please choose a different one.';
-        }
-      }
-    );
+  // Skip email check if it's the same as the user's current email
+  if (updatedUser.email === this.selectedUser.email) {
+    this.updateUser(updatedUser);
+    return;
   }
 
-// Helper method for checking email availability with current user ID
-private checkEmailAvailability(email: string): any {
-  const currentUser = this.userService.getCurrentUser();
-  if (currentUser && currentUser.id !== undefined) {
-    return this.userService.checkEmailAvailability(email, currentUser.id);
+  this.checkEmailAvailability(updatedUser.email).subscribe(
+    (isAvailable: boolean) => {
+      if (isAvailable) {
+        this.updateUser(updatedUser);
+      } else {
+        this.emailErrorMessage =
+          'This email is already in use. Please choose a different one.';
+      }
+    }
+  );
+}
+
+private updateUser(user: User): void {
+  if (user.id !== undefined) {
+    this.userService.updateUser(user.id, user).subscribe({
+      next: () => {
+        this.toastr.success('User updated successfully!');
+        this.showEditModal = false;
+        this.loadUsers();
+      },
+      error: (error) => {
+        this.toastr.error('Failed to update user. Please try again.');
+        console.error('Error updating user:', error);
+      },
+    });
   } else {
-    console.error('Current user ID is undefined');
-    return of(false); // Return an observable with a false value if currentUser is not defined
+    console.error('User ID is undefined');
   }
 }
 
-  toggleModal() {
-    this.showModal = !this.showModal;
-    if (!this.showModal) this.resetCreateForm();
+// Helper method for checking email availability with current user ID
+private checkEmailAvailability(email: string): any {
+  const userId = this.selectedUser?.id ?? this.userService.getCurrentUser()?.id;
+  if (userId !== undefined) {
+    return this.userService.checkEmailAvailability(email, userId);
+  } else {
+    console.error('User ID is undefined for email check');
+    return of(false); // Return an observable with a false value if no ID is found
   }
+}
 
-  toggleEditModal(user?: User) {
-    this.showEditModal = !this.showEditModal;
-    if (user) {
-      this.selectedUser = user;
-      this.editUserForm.patchValue(user);
-    } else {
-      this.selectedUser = null;
-      this.editUserForm.reset();
-    }
+
+toggleModal() {
+  this.showModal = !this.showModal;
+  if (!this.showModal) {
+    this.resetCreateForm();
+    this.emailErrorMessage = ''; // Clear email error message
   }
+}
+
+toggleEditModal(user?: User) {
+  this.showEditModal = !this.showEditModal;
+  if (user) {
+    this.selectedUser = user;
+    this.editUserForm.patchValue(user);
+  } else {
+    this.selectedUser = null;
+    this.editUserForm.reset();
+  }
+  this.emailErrorMessage = ''; // Clear email error message
+}
 
   resetCreateForm() {
     this.createUserForm.reset();
