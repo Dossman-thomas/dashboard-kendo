@@ -72,9 +72,9 @@ export class UserService {
   }
 
   // Get the current user value
-  getCurrentUsers(): Observable<User[]> {
-    return this.getAllUsers(); // Call the existing method to fetch users
-  }
+  // getCurrentUsers(): Observable<User[]> {
+  //   // return this.getAllUsers(); // Call the existing method to fetch users
+  // }
 
   // Create a new user
   createUser(userData: User): Observable<User> {
@@ -138,38 +138,21 @@ export class UserService {
   // }
 
   // Get all users with pagination, filtering, and sorting
-getAllUsers(params?: { 
-  page: number; 
-  limit: number; 
-  searchQuery?: string; 
-  sortBy?: string; 
-  order?: 'ASC' | 'DESC'; 
-}): Observable<User[]> {
-  const options = {
-    headers: this.getHeaders(),
-    params: params
-      ? {
-          page: params.page.toString(),
-          limit: params.limit.toString(),
-          ...(params.searchQuery && { searchQuery: params.searchQuery }), // Add searchQuery if provided
-          ...(params.sortBy && { sortBy: params.sortBy }), // Add sortBy if provided
-          ...(params.order && { order: params.order }), // Add order if provided
-        }
-      : undefined,
-  };
+  getAllUsers(body: any): Observable<User[]> {
+    const headers = this.getHeaders();
 
-  return this.http
-    .get<any>(`${this.baseUrl}`, options)
-    .pipe(
-      map((res) => res.data), // Extract the 'data' property
-      catchError((error) => {
-        console.error('Error fetching users:', error);
-        return throwError(
-          () => new Error('Failed to fetch users. Please try again later.')
-        );
-      })
-    );
-}
+    return this.http
+      .post<any>(`${this.baseUrl}`, body, { headers }) // Add headers here
+      .pipe(
+        map((res) => res.data), // Extract the 'data' property
+        catchError((error) => {
+          console.error('Error fetching users:', error);
+          return throwError(
+            () => new Error('Failed to fetch users. Please try again later.')
+          );
+        })
+      );
+  }
 
 
   // Update user information and reset the current user in localStorage

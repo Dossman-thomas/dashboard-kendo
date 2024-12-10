@@ -115,3 +115,15 @@ input {
   background-color: var(--secondary-blue);
   color: white;
 }
+
+kendo-grid-filter-menu-container {
+  :is(kendo-dropdownlist.k-filter-and) {
+    display: none !important;
+  }
+  
+  :is(kendo-grid-string-filter-menu-input,
+      kendo-grid-numeric-filter-menu-input,
+      kendo-grid-date-filter-menu-input):nth-child(3) {
+    display: none !important;
+  }
+  }

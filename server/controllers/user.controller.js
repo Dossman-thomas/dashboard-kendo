@@ -115,18 +115,18 @@ export const getUserById = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const { 
-      page = 1, 
-      limit = 10, 
-      searchQuery = "", 
-      sortBy = "role", 
-      order = 'ASC',
-    } = req.query;
-    const users = await getAllUsersService({
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page,
+      limit,
+      sorts,
+      filters,
       searchQuery,
-      sortBy,
-      order,
+    } = req.body;
+    const users = await getAllUsersService({
+      page,
+      limit,
+      searchQuery,
+      sorts,
+      filters,
     });
     return response(res, {
       statusCode: 200,

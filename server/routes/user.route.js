@@ -27,7 +27,7 @@ userRouter.post('/check-email/:id', authenticateJWT, checkEmailAvailability); //
 userRouter.get('/:id', authenticateJWT, getUserById); // endpoint: /api/users/:id
 
 // Get all users route
-userRouter.get('/', authenticateJWT, getAllUsers); // endpoint: /api/users
+userRouter.post('/', authenticateJWT, getAllUsers); // endpoint: /api/users
 
 // Update a user by ID route
 userRouter.put('/update/:id', authenticateJWT, updateUser); // endpoint: /api/users/update/:id

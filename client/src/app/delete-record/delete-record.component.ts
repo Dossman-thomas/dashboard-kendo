@@ -43,20 +43,20 @@ export class DeleteRecordComponent implements OnInit {
 
   ngOnInit() {
     // Fetch all users and set the rowData for the AG Grid
-    this.userService.getAllUsers().subscribe({
-      next: (response: any) => {
-        // Access `rows` within the response if it exists and is an array
-        if (Array.isArray(response.rows)) {
-          this.users = response.rows as User[];  // Store the fetched users
-          this.rowData = [...this.users];  // Set the rowData for the grid
-        } else {
-          console.error('Expected rows array but got:', response);
-        }
-      },
-      error: (error) => {
-        console.error('Error fetching users:', error);
-      }
-    });
+    // this.userService.getAllUsers().subscribe({
+    //   next: (response: any) => {
+    //     // Access `rows` within the response if it exists and is an array
+    //     if (Array.isArray(response.rows)) {
+    //       this.users = response.rows as User[];  // Store the fetched users
+    //       this.rowData = [...this.users];  // Set the rowData for the grid
+    //     } else {
+    //       console.error('Expected rows array but got:', response);
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error('Error fetching users:', error);
+    //   }
+    // });
   }
   
 

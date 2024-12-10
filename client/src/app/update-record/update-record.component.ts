@@ -43,23 +43,23 @@ export class UpdateRecordComponent implements OnInit {
 
 
   fetchUsers(): void {
-    this.userService.getAllUsers().subscribe({
-      next: (response: any) => {
-        // Check if response.rows exists and is an array
-        if (Array.isArray(response.rows)) {
-          this.users = response.rows as User[];
-          if (this.gridApi) {
-            this.gridApi.applyTransaction({ add: this.users }); // Apply the data transaction
-          }
-          console.log('Users:', this.users);
-        } else {
-          console.error('Expected rows array but got:', response);
-        }
-      },
-      error: (error) => {
-        console.error('Error fetching users:', error);
-      }
-    });
+    // this.userService.getAllUsers().subscribe({
+    //   next: (response: any) => {
+    //     // Check if response.rows exists and is an array
+    //     if (Array.isArray(response.rows)) {
+    //       this.users = response.rows as User[];
+    //       if (this.gridApi) {
+    //         this.gridApi.applyTransaction({ add: this.users }); // Apply the data transaction
+    //       }
+    //       console.log('Users:', this.users);
+    //     } else {
+    //       console.error('Expected rows array but got:', response);
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error('Error fetching users:', error);
+    //   }
+    // });
   }
   
   

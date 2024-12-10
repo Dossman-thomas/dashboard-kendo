@@ -37,31 +37,65 @@ export const getUserByIdService = async (id) => {
   }
 };
 
-// Get all users with pagination, filtering, and sorting
 export const getAllUsersService = async ({
   page,
   limit,
-  searchQuery,
-  sortBy,
-  order,
+  sorts,
+  filters,
+  searchQuery = '',
 }) => {
   try {
-    // Default values
-    const validSortFields = ['id', 'name', 'email', 'role'];
-    const validOrderValues = ['ASC', 'DESC'];
+    // Handle sorting dynamically
+    const order = sorts && sorts.length > 0
+    ? sorts
+        .filter((sort) => sort.dir) // Exclude elements where dir is undefined
+        .map((sort) => [sort.field, sort.dir.toUpperCase()])
+    : [['createdAt', 'DESC']]; // Default order  
+  
 
-    // Validate sortBy and order inputs
-    const sortField = validSortFields.includes(sortBy) ? sortBy : 'role';
-    const sortOrder = validOrderValues.includes(order.toUpperCase()) ? order.toUpperCase() : 'ASC';
+    const operatorMapping = {
+      contains: Op.like,
+      equals: Op.eq,
+      startsWith: Op.startsWith,
+      endsWith: Op.endsWith,
+      greaterThan: Op.gt,
+      lessThan: Op.lt,
+      greaterThanOrEquals: Op.gte,
+      lessThanOrEquals: Op.lte,
+      notEquals: Op.ne,
+    };
+
+       // Construct the 'where' clause based on filters and search query
+    const where = {
+      [Op.and]: [
+        // Apply filters dynamically
+        ...(filters?.length
+          ? filters.map((filter) => {
+              const operator = operatorMapping[filter.operator] || Op.eq; // Default to 'equals' if no match
+            console.log("Getting Filyer", filter);
+              return {
+                [filter.field]: {
+                  [operator]:
+                    filter.operator === 'contains'
+                      ? `%${filter.value}%`
+                      : filter.value,
+                },
+              };
+            })
+          : []),
+        // Apply search query
+        {
+          [Op.or]: [
+            { name: { [Op.like]: `%${searchQuery}%` } },
+            { email: { [Op.like]: `%${searchQuery}%` } },
+          ],
+        },
+      ],
+    };
 
     const users = await UserModel.findAndCountAll({
-      where: {
-        [Op.or]: [
-          { name: { [Op.like]: `%${searchQuery}%` } },
-          { email: { [Op.like]: `%${searchQuery}%` } },
-        ],
-      },
-      order: [[sortField, sortOrder]],
+      where,
+      order, // Apply sorting
       ...pagination({ page, limit }),
       logging: console.log, // Logs query execution
     });
@@ -69,11 +103,12 @@ export const getAllUsersService = async ({
     return users;
   } catch (error) {
     console.log("Model:", UserModel); // Check if the model is correctly defined
-    console.log("params:", { page, limit, searchQuery, sortBy, order }); // Log the parameters for debugging
+    console.log("params:", { page, limit, sorts, filters, searchQuery }); // Log the parameters for debugging
     console.log("Error:", error); // Log the error for debugging
     throw new Error(error.message);
   }
 };
+
 
 // Update a user by ID
 export const updateUserService = async (id, updatedData) => {
