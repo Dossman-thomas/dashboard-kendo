@@ -24,11 +24,13 @@
     [pageSize]="state.take"
     [skip]="state.skip"
     [sortable]="true"
-    [filterable]="filterMode"
+    [sort]="state.sort"
+    filterable="menu"
+    [filter]="state.filter"
     [pageable]="{ buttonCount: 5, pageSizes: [5, 10, 25, 50] }"
     (dataStateChange)="dataStateChange($event)"
   >
-    <kendo-grid-column field="id" title="ID" [width]="100"></kendo-grid-column>
+    <!-- <kendo-grid-column field="id" title="ID" [width]="100"></kendo-grid-column> -->
     <kendo-grid-command-column title="Action" [width]="100">
       <ng-template kendoGridCellTemplate let-dataItem>
         <!-- Edit Button -->

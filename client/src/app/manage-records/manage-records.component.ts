@@ -2,10 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserService, User } from '../services/user.service';
 import { PermissionsService } from '../services/permissions.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {
-  DataStateChangeEvent,
-  FilterableSettings,
-} from '@progress/kendo-angular-grid';
+import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { State } from '@progress/kendo-data-query';
 import { ToastrService } from 'ngx-toastr';
 import { of } from 'rxjs';
@@ -17,7 +14,6 @@ import { of } from 'rxjs';
 })
 export class ManageRecordsComponent implements OnInit {
   users: User[] = [];
-  gridData: any = { data: [], total: 0 };
   showModal: boolean = false; // show/hide create modal
   showEditModal: boolean = false; // show/hide edit modal
   createUserForm!: FormGroup; // Form group for creating a new user
@@ -28,17 +24,30 @@ export class ManageRecordsComponent implements OnInit {
   emailAvailable: boolean = false;
   emailErrorMessage: string = '';
 
-  // Pagination settings
-  skip: number = 0;
-  take: number = 10;
-
-  // Filter settings
-  public filterMode: FilterableSettings = 'menu';
-
   // Permissions flags
   canCreate: boolean = false;
   canUpdate: boolean = false;
   canDelete: boolean = false;
+
+  // Kendo Grid settings
+  gridData: any = { data: [], total: 0 };
+  body: any = {
+    page: 1,
+    sorts: null,
+    filters: null,
+    limit: 10,
+  };
+
+  // Kendo Grid state
+  public state: State = {
+    skip: 0,
+    take: 10,
+    sort: [],
+    filter: {
+      logic: 'and',
+      filters: [],
+    },
+  };
 
   constructor(
     private userService: UserService,
@@ -46,11 +55,6 @@ export class ManageRecordsComponent implements OnInit {
     private permissionsService: PermissionsService,
     private toastr: ToastrService
   ) {}
-
-  public state: State = {
-    skip: this.skip,
-    take: this.take,
-  };
 
   ngOnInit() {
     this.initializeForms();
@@ -108,49 +112,73 @@ export class ManageRecordsComponent implements OnInit {
     });
   }
 
+  // Handle state changes for Kendo Grid (pagination, sorting, filtering)
   public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
-    this.skip = state.skip!;
-    this.take = state.take!;
+    this.body.page = Math.floor(state.skip / state.take) + 1; // Calculate current page
+    this.body.limit = state.take;
+
+    // Apply sorting
+    this.body.sorts =
+      state.sort?.map((sortElement) => ({
+        field: sortElement.field,
+        dir: sortElement.dir,
+      })) || null;
+
+    // Apply filtering
+    this.body.filters =
+      state.filter?.filters
+        ?.flatMap((item: any) => item.filters || [])
+        .map((filter: any) => ({
+          field: filter.field,
+          operator: filter.operator || 'contains', // Default operator
+          value: filter.value,
+        })) || null;
+
+    console.log('Updated request payload:', this.body);
+
+    // Reload users with updated state
     this.loadUsers();
   }
 
   // Load users with pagination and filters
-  loadUsers() {
-    const page = (this.skip + this.take) / this.take; // Calculate page number
-    this.userService.getAllUsers({ page, limit: this.take }).subscribe({
+  private loadUsers(): void {
+    console.log('Request payload for users:', this.body);
+
+    this.userService.getAllUsers(this.body).subscribe({
       next: (response: any) => {
         if (Array.isArray(response.rows)) {
           this.users = response.rows;
           this.gridData = {
-            data: response.rows,
-            total: response.count,
+            data: this.users,
+            total: response.count || response.rows.length,
           };
+          console.log('Loaded users:', this.gridData);
         } else {
-          console.error('Expected rows array but got:', response);
+          console.error('Unexpected response format:', response);
         }
-      },
-      error: (error) => {
-        console.error('Error fetching users:', error);
       },
     });
   }
 
-  // onUpdate(event: any): void {
-  //   if (!this.canUpdate) {
-  //     console.error('You do not have permission to update this record.');
-  //     return;
-  //   }
-
-  //   const updatedUser: User = event.data;
-  //   if (updatedUser.id) {
-  //     this.userService.updateUser(updatedUser.id, updatedUser).subscribe({
-  //       next: () => alert('User updated successfully!'),
-  //       error: (error) => console.error('Error updating user:', error),
-  //     });
-  //   } else {
-  //     console.error('User ID is undefined');
-  //   }
+  // loadUsers() {
+  //   const page = (this.skip + this.take) / this.take; // Calculate page number
+  //   this.userService.getAllUsers({ page, limit: this.take }).subscribe({
+  //     next: (response: any) => {
+  //       if (Array.isArray(response.rows)) {
+  //         this.users = response.rows;
+  //         this.gridData = {
+  //           data: response.rows,
+  //           total: response.count,
+  //         };
+  //       } else {
+  //         console.error('Expected rows array but got:', response);
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Error fetching users:', error);
+  //     },
+  //   });
   // }
 
   // Handle row deletion
@@ -178,108 +206,111 @@ export class ManageRecordsComponent implements OnInit {
     if (this.createUserForm.invalid) return;
 
     const newUser: User = this.createUserForm.value;
-    this.checkEmailAvailability(newUser.email).subscribe((isAvailable: boolean) => {
-      if (isAvailable) {
-        this.userService.createUser(newUser).subscribe({
-          next: (createdUser) => {
-            this.users.push(createdUser);
-            this.gridData = {
-              data: this.users,
-              total: this.gridData.total,
-            };
-            this.toggleModal();
-            this.toastr.success('User created successfully!');
-            this.loadUsers();
-          },
-          error: (error) => {
-            this.toastr.error('Failed to create user. Please try again.');
-            this.emailErrorMessage = 'This email is already in use. Please choose a different one.';
-            console.error('Error creating user:', error);
-          },
-        });
-      } else {
-        this.emailErrorMessage =
-          'This email is already in use. Please choose a different one.';
+    this.checkEmailAvailability(newUser.email).subscribe(
+      (isAvailable: boolean) => {
+        if (isAvailable) {
+          this.userService.createUser(newUser).subscribe({
+            next: (createdUser) => {
+              this.users.push(createdUser);
+              this.gridData = {
+                data: this.users,
+                total: this.gridData.total,
+              };
+              this.toggleModal();
+              this.toastr.success('User created successfully!');
+              this.loadUsers();
+            },
+            error: (error) => {
+              this.toastr.error('Failed to create user. Please try again.');
+              this.emailErrorMessage =
+                'This email is already in use. Please choose a different one.';
+              console.error('Error creating user:', error);
+            },
+          });
+        } else {
+          this.emailErrorMessage =
+            'This email is already in use. Please choose a different one.';
+        }
       }
-    });
+    );
   }
 
   // Update existing user with email check
   onUpdateUser(): void {
-  if (this.editUserForm.invalid || !this.selectedUser) return;
+    if (this.editUserForm.invalid || !this.selectedUser) return;
 
-  const updatedUser: User = {
-    ...this.selectedUser,
-    ...this.editUserForm.value,
-  };
+    const updatedUser: User = {
+      ...this.selectedUser,
+      ...this.editUserForm.value,
+    };
 
-  // Skip email check if it's the same as the user's current email
-  if (updatedUser.email === this.selectedUser.email) {
-    this.updateUser(updatedUser);
-    return;
-  }
-
-  this.checkEmailAvailability(updatedUser.email).subscribe(
-    (isAvailable: boolean) => {
-      if (isAvailable) {
-        this.updateUser(updatedUser);
-      } else {
-        this.emailErrorMessage =
-          'This email is already in use. Please choose a different one.';
-      }
+    // Skip email check if it's the same as the user's current email
+    if (updatedUser.email === this.selectedUser.email) {
+      this.updateUser(updatedUser);
+      return;
     }
-  );
-}
 
-private updateUser(user: User): void {
-  if (user.id !== undefined) {
-    this.userService.updateUser(user.id, user).subscribe({
-      next: () => {
-        this.toastr.success('User updated successfully!');
-        this.showEditModal = false;
-        this.loadUsers();
-      },
-      error: (error) => {
-        this.toastr.error('Failed to update user. Please try again.');
-        console.error('Error updating user:', error);
-      },
-    });
-  } else {
-    console.error('User ID is undefined');
+    this.checkEmailAvailability(updatedUser.email).subscribe(
+      (isAvailable: boolean) => {
+        if (isAvailable) {
+          this.updateUser(updatedUser);
+        } else {
+          this.emailErrorMessage =
+            'This email is already in use. Please choose a different one.';
+        }
+      }
+    );
   }
-}
 
-// Helper method for checking email availability with current user ID
-private checkEmailAvailability(email: string): any {
-  const userId = this.selectedUser?.id ?? this.userService.getCurrentUser()?.id;
-  if (userId !== undefined) {
-    return this.userService.checkEmailAvailability(email, userId);
-  } else {
-    console.error('User ID is undefined for email check');
-    return of(false); // Return an observable with a false value if no ID is found
+  private updateUser(user: User): void {
+    if (user.id !== undefined) {
+      this.userService.updateUser(user.id, user).subscribe({
+        next: () => {
+          this.toastr.success('User updated successfully!');
+          this.showEditModal = false;
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.toastr.error('Failed to update user. Please try again.');
+          console.error('Error updating user:', error);
+        },
+      });
+    } else {
+      console.error('User ID is undefined');
+    }
   }
-}
 
+  // Helper method for checking email availability with current user ID
+  private checkEmailAvailability(email: string): any {
+    const userId =
+      this.selectedUser?.id ?? this.userService.getCurrentUser()?.id;
+    if (userId !== undefined) {
+      return this.userService.checkEmailAvailability(email, userId);
+    } else {
+      console.error('User ID is undefined for email check');
+      return of(false); // Return an observable with a false value if no ID is found
+    }
+  }
 
-toggleModal() {
-  this.showModal = !this.showModal;
-  if (!this.showModal) {
-    this.resetCreateForm();
+  toggleModal() {
+    this.showModal = !this.showModal;
+    if (!this.showModal) {
+      this.resetCreateForm();
+      this.emailErrorMessage = ''; // Clear email error message
+    }
+  }
+
+  toggleEditModal(user?: User) {
+    this.showEditModal = !this.showEditModal;
+    if (user) {
+      this.selectedUser = user;
+      this.editUserForm.patchValue(user);
+    } else {
+      this.selectedUser = null;
+      this.editUserForm.reset();
+    }
     this.emailErrorMessage = ''; // Clear email error message
   }
-}
-
-toggleEditModal(user?: User) {
-  this.showEditModal = !this.showEditModal;
-  if (user) {
-    this.selectedUser = user;
-    this.editUserForm.patchValue(user);
-  } else {
-    this.selectedUser = null;
-    this.editUserForm.reset();
-  }
-  this.emailErrorMessage = ''; // Clear email error message
-}
 
   resetCreateForm() {
     this.createUserForm.reset();
