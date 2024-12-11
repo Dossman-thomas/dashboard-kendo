@@ -34,7 +34,7 @@
         <!-- Edit Button -->
         <button
           kendoGridEditCommand
-          class="btn btn-sm btn-primary"
+          class="btn btn-sm can-update-btn"
           *ngIf="canUpdate"
           (click)="toggleEditModal(dataItem)"
         >
@@ -43,7 +43,7 @@
         <!-- Delete Button -->
         <button
           kendoGridRemoveCommand
-          class="btn btn-sm btn-danger ms-2"
+          class="btn btn-sm ms-2 can-delete-btn"
           *ngIf="canDelete"
           (click)="onDelete(dataItem.id)"
         >

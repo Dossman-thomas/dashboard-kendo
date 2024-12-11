@@ -93,12 +93,14 @@ input {
 
 .save-btn:hover,
 .update-pass-btn:hover,
+.can-update-btn:hover,
 .edit-user-btn:hover {
   background-color: var(--secondary-purple);
   color: white;
 }
 
-.cancel-btn {
+.cancel-btn,
+.can-delete-btn:hover {
   background-color: var(--secondary-red);
   color: white;
   cursor: pointer;
