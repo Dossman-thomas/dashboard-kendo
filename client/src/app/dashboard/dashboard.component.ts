@@ -13,6 +13,7 @@ export class DashboardComponent implements OnInit {
   totalUsers: number = 0;
   dataManagerCount: number = 0;
   employeeCount: number = 0;
+  adminCount: number = 0;
   firstName: string = '';
 
   // Kendo Grid settings
@@ -59,10 +60,10 @@ export class DashboardComponent implements OnInit {
       next: (response: any) => {
         if (Array.isArray(response.rows)) {
           this.users = response.rows;
-          this.totalUsers = response.count || response.rows.length;
+          // this.totalUsers = response.count || response.rows.length;
           this.gridData = {
             data: this.users,
-            total: this.totalUsers,
+            total: response.count || response.rows.length,
           };
           console.log('Loaded users:', this.gridData);
         } else {
@@ -81,12 +82,19 @@ export class DashboardComponent implements OnInit {
       next: (stats) => {
         this.dataManagerCount = stats.datamanagerCount;
         this.employeeCount = stats.employeeCount;
+        this.adminCount = stats.adminCount;
         console.log('Role statistics:', stats);
+        this.calculateTotalUsers(); // update total users count
       },
       error: (error) => {
         console.error('Failed to fetch role statistics:', error);
       },
     });
+  }
+
+  // Calculate total users count
+  private calculateTotalUsers(): void {
+    this.totalUsers = this.dataManagerCount + this.employeeCount + this.adminCount;
   }
 
   // Handle state changes for Kendo Grid (pagination, sorting, filtering)
