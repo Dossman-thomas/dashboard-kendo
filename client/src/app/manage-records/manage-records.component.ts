@@ -16,6 +16,8 @@ export class ManageRecordsComponent implements OnInit {
   users: User[] = [];
   showModal: boolean = false; // show/hide create modal
   showEditModal: boolean = false; // show/hide edit modal
+  showDeleteModal: boolean = false; // show/hide delete modal
+  deleteUserId: number | null = null; // ID of user to be deleted
   createUserForm!: FormGroup; // Form group for creating a new user
   editUserForm!: FormGroup; // Form group for editing a user
   selectedUser!: User | null; // User currently being edited
@@ -161,37 +163,44 @@ export class ManageRecordsComponent implements OnInit {
     });
   }
 
-  // loadUsers() {
-  //   const page = (this.skip + this.take) / this.take; // Calculate page number
-  //   this.userService.getAllUsers({ page, limit: this.take }).subscribe({
-  //     next: (response: any) => {
-  //       if (Array.isArray(response.rows)) {
-  //         this.users = response.rows;
+  // Handle row deletion
+  // onDelete(userId: number): void {
+  //   if (confirm('Are you sure you want to delete this record?')) {
+  //     this.userService.deleteUser(userId).subscribe(
+  //       () => {
+  //         this.users = this.users.filter((user) => user.id !== userId);
   //         this.gridData = {
-  //           data: response.rows,
-  //           total: response.count,
+  //           data: this.users,
+  //           total: this.gridData.total,
   //         };
-  //       } else {
-  //         console.error('Expected rows array but got:', response);
+  //         this.toastr.success('User deleted successfully.');
+  //       },
+  //       (error) => {
+  //         this.toastr.error('Failed to delete user. Please try again.');
+  //         console.error('Error deleting user:', error);
   //       }
-  //     },
-  //     error: (error) => {
-  //       console.error('Error fetching users:', error);
-  //     },
-  //   });
+  //     );
+  //   }
   // }
 
-  // Handle row deletion
-  onDelete(userId: number): void {
-    if (confirm('Are you sure you want to delete this record?')) {
-      this.userService.deleteUser(userId).subscribe(
+  // Show the delete confirmation modal
+  confirmDelete(userId: number): void {
+    this.deleteUserId = userId;
+    this.showDeleteModal = true;
+  }
+  
+  // Delete user after confirmation
+  onConfirmDelete(): void {
+    if (this.deleteUserId !== null) {
+      this.userService.deleteUser(this.deleteUserId).subscribe(
         () => {
-          this.users = this.users.filter((user) => user.id !== userId);
+          this.users = this.users.filter((user) => user.id !== this.deleteUserId);
           this.gridData = {
             data: this.users,
             total: this.gridData.total,
           };
           this.toastr.success('User deleted successfully.');
+          this.loadUsers();
         },
         (error) => {
           this.toastr.error('Failed to delete user. Please try again.');
@@ -199,6 +208,18 @@ export class ManageRecordsComponent implements OnInit {
         }
       );
     }
+    this.resetDeleteModal();
+  }
+  
+  // Cancel the delete operation
+  onCancelDelete(): void {
+    this.resetDeleteModal();
+  }
+  
+  // Reset the delete modal state
+  private resetDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.deleteUserId = null;
   }
 
   // Create new user with email check

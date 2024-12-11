@@ -100,10 +100,16 @@ input {
 }
 
 .cancel-btn,
+.confirm-delete-btn,
 .can-delete-btn:hover {
   background-color: var(--secondary-red);
   color: white;
   cursor: pointer;
+}
+
+.confirm-delete-btn:hover {
+  background-color: #e23e43;
+  color: white;
 }
 
 .create-user-btn {

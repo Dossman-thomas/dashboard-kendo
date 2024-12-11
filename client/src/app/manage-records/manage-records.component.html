@@ -31,7 +31,8 @@
     (dataStateChange)="dataStateChange($event)"
   >
     <!-- <kendo-grid-column field="id" title="ID" [width]="100"></kendo-grid-column> -->
-    <kendo-grid-command-column title="Action" [width]="100">
+    <kendo-grid-command-column title="Action" *ngIf="canUpdate || canDelete"
+    [width]="100">
       <ng-template kendoGridCellTemplate let-dataItem>
         <!-- Edit Button -->
         <button
@@ -47,7 +48,7 @@
           kendoGridRemoveCommand
           class="btn btn-sm ms-2 can-delete-btn"
           *ngIf="canDelete"
-          (click)="onDelete(dataItem.id)"
+          (click)="confirmDelete(dataItem.id)"
         >
           <i class="fa fa-trash" aria-hidden="true"></i>
         </button>
@@ -318,6 +319,49 @@
             Update
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Deleting User -->
+<div
+  class="modal fade"
+  [ngClass]="{ 'show d-block': showDeleteModal }"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="onCancelDelete()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this user?</p>
+      </div>
+      <div class="modal-footer">
+        <button
+        type="button"
+        class="btn confirm-delete-btn"
+        (click)="onConfirmDelete()"
+      >
+        Delete
+      </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onCancelDelete()"
+        >
+          Cancel
+        </button>
+
       </div>
     </div>
   </div>
