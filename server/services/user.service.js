@@ -4,7 +4,6 @@ import { pagination } from "../utils/common.util.js";
 import { Op } from "sequelize";
 import bcrypt from "bcrypt";
 
-
 // Create a new user
 export const createUserService = async (userData) => {
   try {
@@ -37,49 +36,130 @@ export const getUserByIdService = async (id) => {
   }
 };
 
+// // Get all users with pagination, sorting, filtering, and search
+// export const getAllUsersService = async ({
+//   page,
+//   limit,
+//   sorts,
+//   filters,
+//   searchQuery = '',
+// }) => {
+//   try {
+//     // Handle sorting dynamically
+//     const order = sorts && sorts.length > 0
+//     ? sorts
+//         .filter((sort) => sort.dir) // Exclude elements where dir is undefined
+//         .map((sort) => [sort.field, sort.dir.toUpperCase()])
+//     : [['createdAt', 'DESC']]; // Default order
+
+//     const operatorMapping = {
+//       contains: Op.like,
+//       doesnotcontain: Op.notLike,
+//       equals: Op.eq,
+//       startsWith: Op.startsWith,
+//       endsWith: Op.endsWith,
+//       greaterThan: Op.gt,
+//       lessThan: Op.lt,
+//       greaterThanOrEquals: Op.gte,
+//       lessThanOrEquals: Op.lte,
+//       notEquals: Op.ne,
+//     };
+
+//        // Construct the 'where' clause based on filters and search query
+//     const where = {
+//       [Op.and]: [
+//         // Apply filters dynamically
+//         ...(filters?.length
+//           ? filters.map((filter) => {
+//               const operator = operatorMapping[filter.operator] || Op.eq; // Default to 'equals' if no match
+//             console.log("Getting Filter", filter);
+//               return {
+//                 [filter.field]: {
+//                   [operator]:
+//                     filter.operator === 'contains'
+//                       ? `%${filter.value}%`
+//                       : filter.value,
+//                 },
+//               };
+//             })
+//           : []),
+//         // Apply search query
+//         {
+//           [Op.or]: [
+//             { name: { [Op.like]: `%${searchQuery}%` } },
+//             { email: { [Op.like]: `%${searchQuery}%` } },
+//           ],
+//         },
+//       ],
+//     };
+
+//     const users = await UserModel.findAndCountAll({
+//       where,
+//       order, // Apply sorting
+//       ...pagination({ page, limit }),
+//       logging: console.log, // Logs query execution
+//     });
+
+//     return users;
+//   } catch (error) {
+//     console.log("Model:", UserModel); // Check if the model is correctly defined
+//     console.log("params:", { page, limit, sorts, filters, searchQuery }); // Log the parameters for debugging
+//     console.log("Error:", error); // Log the error for debugging
+//     throw new Error(error.message);
+//   }
+// };
+
+// Update a user by ID
+
+// Get all users with pagination, sorting, filtering, and search
+
 export const getAllUsersService = async ({
   page,
   limit,
   sorts,
   filters,
-  searchQuery = '',
+  searchQuery = "",
 }) => {
   try {
     // Handle sorting dynamically
-    const order = sorts && sorts.length > 0
-    ? sorts
-        .filter((sort) => sort.dir) // Exclude elements where dir is undefined
-        .map((sort) => [sort.field, sort.dir.toUpperCase()])
-    : [['createdAt', 'DESC']]; // Default order  
-  
+    const order =
+      sorts && sorts.length > 0
+        ? sorts
+            .filter((sort) => sort.dir) // Exclude elements where dir is undefined
+            .map((sort) => [sort.field, sort.dir.toUpperCase()])
+        : [["createdAt", "DESC"]]; // Default order
 
     const operatorMapping = {
-      contains: Op.like,
-      equals: Op.eq,
-      startsWith: Op.startsWith,
-      endsWith: Op.endsWith,
+      contains: Op.iLike,
+      doesnotcontain: Op.notLike,
+      eq: Op.eq, // equals
+      neq: Op.ne, // not equals
+      startswith: Op.startsWith,
+      endswith: Op.endsWith,
       greaterThan: Op.gt,
       lessThan: Op.lt,
       greaterThanOrEquals: Op.gte,
       lessThanOrEquals: Op.lte,
-      notEquals: Op.ne,
     };
 
-       // Construct the 'where' clause based on filters and search query
+    // Construct the 'where' clause based on filters and search query
     const where = {
       [Op.and]: [
         // Apply filters dynamically
         ...(filters?.length
           ? filters.map((filter) => {
               const operator = operatorMapping[filter.operator] || Op.eq; // Default to 'equals' if no match
-            console.log("Getting Filyer", filter);
+              console.log("Getting Filter", filter);
+              console.log("Getting Operator", operator);
+              console.log("Getting Filter Operator : ", filter.operator);
+              const value =
+                filter.operator === "contains" ||
+                filter.operator === "doesnotcontain"
+                  ? `%${filter.value}%`
+                  : filter.value; // Exact value for other operators
+
               return {
-                [filter.field]: {
-                  [operator]:
-                    filter.operator === 'contains'
-                      ? `%${filter.value}%`
-                      : filter.value,
-                },
+                [filter.field]: { [operator]: value },
               };
             })
           : []),
@@ -109,8 +189,6 @@ export const getAllUsersService = async ({
   }
 };
 
-
-// Update a user by ID
 export const updateUserService = async (id, updatedData) => {
   try {
     const user = await UserModel.findByPk(id);
@@ -214,5 +292,3 @@ export const userStatCheckService = async () => {
     throw new Error(`Failed to fetch user statistics: ${error.message}`);
   }
 };
-
-

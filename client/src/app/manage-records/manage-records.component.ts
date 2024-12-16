@@ -35,9 +35,9 @@ export class ManageRecordsComponent implements OnInit {
   gridData: any = { data: [], total: 0 };
   body: any = {
     page: 1,
+    limit: 10,
     sorts: null,
     filters: null,
-    limit: 10,
   };
 
   // Kendo Grid state
@@ -162,26 +162,6 @@ export class ManageRecordsComponent implements OnInit {
       },
     });
   }
-
-  // Handle row deletion
-  // onDelete(userId: number): void {
-  //   if (confirm('Are you sure you want to delete this record?')) {
-  //     this.userService.deleteUser(userId).subscribe(
-  //       () => {
-  //         this.users = this.users.filter((user) => user.id !== userId);
-  //         this.gridData = {
-  //           data: this.users,
-  //           total: this.gridData.total,
-  //         };
-  //         this.toastr.success('User deleted successfully.');
-  //       },
-  //       (error) => {
-  //         this.toastr.error('Failed to delete user. Please try again.');
-  //         console.error('Error deleting user:', error);
-  //       }
-  //     );
-  //   }
-  // }
 
   // Show the delete confirmation modal
   confirmDelete(userId: number): void {

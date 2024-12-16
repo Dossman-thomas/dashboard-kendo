@@ -94,23 +94,6 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// Get all users
-// export const getAllUsers = async (req, res) => {
-//   try {
-//     const users = await getAllUsersService();
-//     return response(res, {
-//       statusCode: 200,
-//       message: messages.general.SUCCESS,
-//       data: users,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return response(res, {
-//       statusCode: 500,
-//       message: messages.general.INTERNAL_SERVER_ERROR,
-//     });
-//   }
-// };
 
 export const getAllUsers = async (req, res) => {
   try {
