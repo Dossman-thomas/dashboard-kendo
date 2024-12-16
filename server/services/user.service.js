@@ -1,7 +1,7 @@
 // Import the user model
 import { UserModel } from "../database/models/user.model.js";
 import { pagination } from "../utils/common.util.js";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import bcrypt from "bcrypt";
 
 // Create a new user
@@ -157,6 +157,22 @@ export const getAllUsersService = async ({
                 filter.operator === "doesnotcontain"
                   ? `%${filter.value}%`
                   : filter.value; // Exact value for other operators
+
+              // Handle casting ENUM column 'role' for various operators
+              // if (filter.field === "role") {
+              //   if (
+              //     filter.operator === "contains" ||
+              //     filter.operator === "doesnotcontain" ||
+              //     filter.operator === "startswith" ||
+              //     filter.operator === "endswith"
+              //   ) {
+              //     return Sequelize.where(
+              //       Sequelize.cast(Sequelize.col("role"), "TEXT"),
+              //       operator,
+              //       value
+              //     );
+              //   }
+              // }
 
               return {
                 [filter.field]: { [operator]: value },
