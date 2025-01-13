@@ -26,20 +26,9 @@ const sequelize = new Sequelize(
     port: dbConfig.port,
     dialect: "postgres",
     dialectOptions: {
-      // ssl: {
-      //   require: true,
-      //   rejectUnauthorized: false,
-      // },
-      // keepAlive: true,
       useUTC: true,
       timezone: "UTC",
     },
-    // pool: {
-    //   max: 5,
-    //   min: 0,
-    //   idle: 10000,
-    // },
-    // ssl: true,
     logging: false,
   }
 );

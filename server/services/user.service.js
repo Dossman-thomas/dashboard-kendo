@@ -130,8 +130,8 @@ export const getAllUsersService = async ({
         : [["createdAt", "DESC"]]; // Default order
 
     const operatorMapping = {
-      contains: Op.iLike,
-      doesnotcontain: Op.notLike,
+      contains: Op.iLike, 
+      doesnotcontain: Op.notiLike,
       eq: Op.eq, // equals
       neq: Op.ne, // not equals
       startswith: Op.startsWith,
